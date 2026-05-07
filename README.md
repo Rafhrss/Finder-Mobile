@@ -2,6 +2,8 @@
 
 Mobile app project built with **Expo + React Native**.
 
+`lqD2zaniX2ZUJhYG`
+
 ## Menjalankan Project
 
 ### 1) Prasyarat
@@ -16,7 +18,7 @@ npm install
 
 ### 3) Jalankan aplikasi
 ```bash
-npm run start
+npx expo start
 ```
 
 Setelah Metro bundler terbuka:
@@ -25,14 +27,7 @@ Setelah Metro bundler terbuka:
 - tekan `w` untuk Web
 - atau scan QR dari Expo Go di device
 
-### 4) Shortcut per platform
-```bash
-npm run android
-npm run ios
-npm run web
-```
-
-### 5) Linting
+### 4) Linting
 ```bash
 npm run lint
 ```

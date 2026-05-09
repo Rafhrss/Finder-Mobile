@@ -1,12 +1,7 @@
-import React from "react";
-import { Text, View } from "react-native";
+import ReportView from "@screens/report/views";
 
 const report = () => {
-  return (
-    <View>
-      <Text>Hello World</Text>
-    </View>
-  );
+  return <ReportView />;
 };
 
 export default report;

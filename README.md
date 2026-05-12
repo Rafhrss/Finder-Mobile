@@ -34,66 +34,20 @@ npm run lint
 
 ## Panduan Kontribusi
 
-### Alur kontribusi
-1. Fork repository ini (jika bukan collaborator langsung).
-2. Buat branch baru dari branch utama.
-3. Kerjakan perubahan dalam branch tersebut.
-4. Commit perubahan yang jelas dan terarah.
-5. Buka Pull Request (PR) ke repository ini.
+Terima kasih atas minat Anda untuk berkontribusi pada Finder Mobile! Untuk panduan lengkap tentang cara berkontribusi, termasuk:
+- 📋 Cara membuat issue dengan format yang benar
+- 🔄 Cara mengambil/assign issue
+- 💬 Guidelines commit message
+- 🚀 Cara membuat Pull Request
+- 📚 Development workflow lengkap
 
-### Rekomendasi penamaan branch
-Gunakan format yang mudah dilacak ke issue:
-```text
-FU-xx
-```
+Silakan baca **[CONTRIBUTING.md](./CONTRIBUTING.md)** untuk informasi detail.
 
-Contoh:
-```text
-FU-12
-FU-13
-```
+### Quick Start untuk Kontribusi
 
-### Rekomendasi format commit
-Gunakan commit message yang ringkas dan konsisten:
-```text
-type(scope): message
-```
+1. Fork repository ini (jika bukan collaborator langsung)
+2. Buat branch baru: `git checkout -b FU-xx`
+3. Lakukan perubahan dan commit dengan format yang benar
+4. Push dan buka Pull Request
 
-Contoh:
-```text
-feat(home): add initial home screen layout
-docs(readme): add contribution and setup guide
-fix(navbar): correct active tab highlight
-```
-
-### Aturan sebelum membuat PR
-- Pastikan aplikasi dapat dijalankan lokal.
-- Pastikan lint tidak error (`npm run lint`).
-- Kaitkan PR dengan issue terkait (misal `FU-12`).
-- Jelaskan perubahan, dampak, dan screenshot (untuk perubahan UI).
-
-### Panduan membuat Pull Request yang benar
-1. **Sinkronkan branch utama terlebih dahulu**
-   ```bash
-   git checkout main
-   git pull origin main
-   ```
-2. **Buat branch kerja sesuai format**
-   ```bash
-   git checkout -b FU-xx
-   ```
-3. **Lakukan perubahan, lalu commit dengan pesan yang jelas**
-   ```bash
-   git add .
-   git commit -m "feat(scope): deskripsi perubahan"
-   ```
-4. **Push branch ke remote**
-   ```bash
-   git push -u origin FU-xx
-   ```
-5. **Buat PR dari branch `FU-xx` ke `main`** dengan isi minimal:
-   - Ringkasan perubahan
-   - Referensi issue (contoh: `Closes #15`)
-   - Screenshot/video jika ada perubahan UI
-   - Catatan testing singkat
-6. **Pastikan PR fokus pada satu issue** agar review lebih cepat dan jelas.
+Untuk panduan lengkap, baca **[CONTRIBUTING.md](./CONTRIBUTING.md)**

@@ -30,7 +30,7 @@ const Card = ({ item, onPress }: CardProps) => {
   const statusLabel = isLost ? "Hilang" : "Ditemukan";
 
   return (
-    <View className="mb-3">
+    <View className="mb-4">
       <PaperCard mode="contained" onPress={onPress}>
         <PaperCard.Content>
           <View className="mb-2 flex-row items-center justify-between gap-2">

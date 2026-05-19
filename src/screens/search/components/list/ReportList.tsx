@@ -85,7 +85,7 @@ const ReportList = ({ activeTab, searchQuery }: ReportListProps) => {
       data={filteredItems}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => <Card item={item} />}
-      className="p-4 "
+      className="px-4 pt-3 pb-4"
       showsVerticalScrollIndicator={false}
     />
   );

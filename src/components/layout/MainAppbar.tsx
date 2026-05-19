@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { Image, View } from "react-native";
 import { Appbar, Avatar, useTheme } from "react-native-paper";
 
 const MainAppbar = () => {
@@ -11,7 +11,10 @@ const MainAppbar = () => {
       style={{ backgroundColor: colors.surfaceVariant }}
     >
       <View className="ml-3 mr-2.5">
-        <Avatar.Image size={34} source={require("@assets/images/icon.png")} />
+        <Image
+          source={require("@assets/images/icon_3.png")}
+          style={{ width: 70, height: 70, resizeMode: "contain" }}
+        />
       </View>
       <Appbar.Content title="FINDER" color={colors.onSurfaceVariant} />
       <View className="mr-3">

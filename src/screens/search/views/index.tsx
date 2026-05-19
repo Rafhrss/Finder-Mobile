@@ -28,7 +28,7 @@ const Index = (props: SearchProps) => {
 
   return (
     <View className="flex-1 bg-[#060E17]">
-      <View className="mx-4 mt-2">
+      <View className="mx-4 mt-4 mb-4">
         <Searchbar
           placeholder="Cari Barang..."
           value={searchQuery}
@@ -36,7 +36,7 @@ const Index = (props: SearchProps) => {
         />
       </View>
 
-      <View className="mt-3 flex-1">
+      <View className="flex-1">
         <TabView
           navigationState={{ index: activeIndex, routes }}
           onIndexChange={setActiveIndex}

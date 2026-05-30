@@ -51,3 +51,19 @@ Silakan baca **[CONTRIBUTING.md](./CONTRIBUTING.md)** untuk informasi detail.
 4. Push dan buka Pull Request
 
 Untuk panduan lengkap, baca **[CONTRIBUTING.md](./CONTRIBUTING.md)**
+
+
+npm install @react-native-google-signin/google-signin@latest
+npm install @supabase/supabase-js
+npx expo install @react-native-async-storage/async-storage
+npm install react-native-url-polyfill
+
+
+npx expo run:android
+
+
+tambah di paling bawah file android/gradle.properties:
+org.gradle.java.home=D:/#ProgramFiles/zulu17.66.19-ca-jdk17.0.19-win_x64
+
+buat file baru android/local.properties
+sdk.dir=C:/Users/rafaC/AppData/Local/Android/Sdk

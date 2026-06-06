@@ -30,7 +30,7 @@ export default function RootLayout() {
             screenOptions={{
               headerShown: false,
               contentStyle: { backgroundColor: theme.colors.background },
-              animation: "slide_from_right",
+              animation: "none",
             }}
           />
         </PaperProvider>

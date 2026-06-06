@@ -1,9 +1,14 @@
 import SearchView from "@/src/screens/search/views";
 import React from "react";
-import { JumpToProps } from "../libs/types";
+import type { JumpToProps, DetailNavigation } from "../libs/types";
 
-const search = ({ jumpTo }: JumpToProps) => {
-  return <SearchView goReport={() => jumpTo("report")} />;
+const search = ({ jumpTo, openDetail }: JumpToProps & DetailNavigation) => {
+  return (
+    <SearchView
+      goReport={() => jumpTo("report")}
+      openDetail={openDetail}
+    />
+  );
 };
 
 export default search;

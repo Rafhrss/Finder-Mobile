@@ -4,11 +4,13 @@ import { IconButton, Searchbar, useTheme } from "react-native-paper";
 import { TabBar, TabView } from "react-native-tab-view";
 import ReportList from "../components/list/ReportList";
 import { convertStatus } from "../utils";
+import type { ReportItem } from "@libs/dummyData";
 
 const TAB_ITEMS = ["all", "lost", "found"] as const;
 type TabKey = (typeof TAB_ITEMS)[number];
 type SearchProps = {
   goReport: () => void;
+  openDetail: (item: ReportItem) => void;
 };
 
 const Index = (props: SearchProps) => {
@@ -45,6 +47,7 @@ const Index = (props: SearchProps) => {
             <ReportList
               activeTab={route.key as TabKey}
               searchQuery={searchQuery}
+              openDetail={props.openDetail}
             />
           )}
           renderTabBar={(props) => (

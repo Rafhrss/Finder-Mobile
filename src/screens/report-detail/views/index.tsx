@@ -1,22 +1,17 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useNavigation } from "@react-navigation/native";
-import { useLocalSearchParams } from "expo-router";
 import { theme } from "@libs/theme";
+import type { ReportItem } from "@libs/dummyData";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const ReportDetailView = () => {
-  const navigation = useNavigation();
-  const params = useLocalSearchParams();
+interface ReportDetailViewProps {
+  item: ReportItem;
+  onBack: () => void;
+}
 
-  const title = params.title || "Detail Barang";
-  const description = params.description || "-";
-  const location = params.location || "-";
-  const createdAt = params.created_at || "-";
-  const status = params.status || "lost";
-
-  const isLost = status === "lost";
+const ReportDetailView = ({ item, onBack }: ReportDetailViewProps) => {
+  const isLost = item.status === "lost";
   const statusColor = isLost ? "#EF4444" : theme.colors.primary;
   const statusLabel = isLost ? "Hilang" : "Ditemukan";
   const statusIcon = isLost ? "alert-circle-outline" : "check-circle-outline";
@@ -29,7 +24,7 @@ const ReportDetailView = () => {
       {/* Header */}
       <View className="flex-row items-center px-4 py-3">
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={onBack}
           className="h-10 w-10 items-center justify-center rounded-full"
           style={{ backgroundColor: theme.colors.surfaceVariant }}
         >
@@ -92,13 +87,13 @@ const ReportDetailView = () => {
             className="text-sm font-medium"
             style={{ color: theme.colors.onSurfaceVariant }}
           >
-            {createdAt}
+            {item.created_at}
           </Text>
         </View>
 
         {/* Title */}
         <Text className="mt-4 text-2xl font-bold text-white">
-          {title}
+          {item.title}
         </Text>
 
         {/* Location Card */}
@@ -124,7 +119,7 @@ const ReportDetailView = () => {
               TERAKHIR DILIHAT / LOKASI
             </Text>
             <Text className="mt-0.5 text-base text-white">
-              {location}
+              {item.location}
             </Text>
           </View>
         </View>
@@ -141,7 +136,7 @@ const ReportDetailView = () => {
             className="mt-3 text-base leading-6"
             style={{ color: theme.colors.onSurfaceVariant }}
           >
-            {description}
+            {item.description}
           </Text>
         </View>
 

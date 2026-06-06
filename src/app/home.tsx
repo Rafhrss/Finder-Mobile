@@ -1,14 +1,8 @@
-import React from "react";
-import { View } from "react-native";
-import { Text } from "react-native-paper";
+import HomeView from "@screens/home/views";
+import type { DetailNavigation } from "@/src/libs/types";
 
-const Home = () => {
-  return (
-    <View className="flex-1 items-center justify-center bg-[#060E17] px-6">
-      <Text variant="headlineSmall">Home</Text>
-      <Text variant="bodyMedium">Konten halaman akan ditambahkan nanti.</Text>
-    </View>
-  );
+const Home = (props: DetailNavigation) => {
+  return <HomeView openDetail={props.openDetail} />;
 };
 
 export default Home;

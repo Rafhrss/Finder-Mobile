@@ -57,12 +57,15 @@ const DUMMY_ITEMS: Item[] = [
   },
 ];
 
+import { useRouter } from "expo-router";
+
 type ReportListProps = {
   activeTab: "all" | "lost" | "found";
   searchQuery: string;
 };
 
 const ReportList = ({ activeTab, searchQuery }: ReportListProps) => {
+  const router = useRouter();
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const filteredItems = DUMMY_ITEMS.filter((item) => {
     const matchedTab =
@@ -84,7 +87,14 @@ const ReportList = ({ activeTab, searchQuery }: ReportListProps) => {
     <FlatList
       data={filteredItems}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <Card item={item} />}
+      renderItem={({ item }) => (
+        <Card
+          item={item}
+          onPress={() =>
+            router.push({ pathname: "/report-detail", params: { ...item } })
+          }
+        />
+      )}
       className="px-4 pt-3 pb-4"
       showsVerticalScrollIndicator={false}
     />

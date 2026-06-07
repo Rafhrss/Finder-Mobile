@@ -4,7 +4,7 @@ import ReportCard from "@components/common/ReportCard";
 import { DUMMY_ITEMS, type ReportItem } from "@libs/dummyData";
 
 type ReportListProps = {
-  activeTab: "all" | "lost" | "found";
+  activeTab: "all" | "lost" | "found" | "done";
   searchQuery: string;
   openDetail: (item: ReportItem) => void;
 };

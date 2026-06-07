@@ -1,6 +1,6 @@
-import { View } from "react-native";
 import MainAppbar from "@/src/components/layout/MainAppbar";
 import MainBottomNavigation from "@/src/components/layout/MainBottomNavigation";
+import { View } from "react-native";
 
 export default function Index() {
   return (

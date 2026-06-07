@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { useWindowDimensions, View } from "react-native";
-import { IconButton, Searchbar, useTheme } from "react-native-paper";
+import { Searchbar, useTheme } from "react-native-paper";
 import { TabBar, TabView } from "react-native-tab-view";
 import ReportList from "../components/list/ReportList";
 import { convertStatus } from "../utils";
 import type { ReportItem } from "@libs/dummyData";
 
-const TAB_ITEMS = ["all", "lost", "found"] as const;
+const TAB_ITEMS = ["all", "lost", "found", "done"] as const;
 type TabKey = (typeof TAB_ITEMS)[number];
 type SearchProps = {
   goReport: () => void;
@@ -69,16 +69,6 @@ const Index = (props: SearchProps) => {
               activeColor="#0AF3B9"
             />
           )}
-        />
-      </View>
-
-      <View className="absolute bottom-3 right-3">
-        <IconButton
-          icon="plus"
-          mode="contained"
-          containerColor={colors.primary}
-          iconColor={colors.onPrimary}
-          onPress={props.goReport}
         />
       </View>
     </View>

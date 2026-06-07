@@ -2,8 +2,9 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
 import type { ReportItem } from "@libs/dummyData";
 import React, { useState, useCallback, useEffect } from "react";
-import { Animated, BackHandler, View } from "react-native";
+import { Animated, BackHandler, View, Alert } from "react-native";
 import { BottomNavigation } from "react-native-paper";
+import { useAuth } from "../../contexts/AuthContext";
 
 import ChatScreen from "@/src/app/chat";
 import HomeScreen from "@/src/app/home";
@@ -53,6 +54,7 @@ const routeScreen: RouteItem[] = [
 ];
 
 const MainBottomNavigation = () => {
+  const { userToken } = useAuth();
   const [index, setIndex] = useState(0);
   const [routes] = useState(routeScreen);
 
@@ -125,7 +127,18 @@ const MainBottomNavigation = () => {
     <View style={{ flex: 1 }}>
       <BottomNavigation
         navigationState={{ index, routes }}
-        onIndexChange={setIndex}
+        onIndexChange={(newIndex) => {
+          const selectedRoute = routes[newIndex].key;
+          
+          if ((selectedRoute === "report" || selectedRoute === "chat") && !userToken) {
+            Alert.alert("Akses Ditolak", "Anda harus login terlebih dahulu untuk mengakses halaman ini.");
+            // Arahkan ke profile (yang isinya halaman login)
+            const profileIndex = routes.findIndex(r => r.key === "profile");
+            setIndex(profileIndex);
+          } else {
+            setIndex(newIndex);
+          }
+        }}
         renderScene={renderScene}
         renderIcon={({ route, focused, color }) => {
           const iconName = focused

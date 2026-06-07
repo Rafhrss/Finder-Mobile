@@ -11,6 +11,7 @@ import { ThemeProvider, DarkTheme } from "@react-navigation/native";
 import { View } from "react-native";
 import * as SystemUI from "expo-system-ui";
 import { useEffect } from "react";
+import { AuthProvider } from "../contexts/AuthContext";
 
 export default function RootLayout() {
   useEffect(() => {
@@ -19,22 +20,24 @@ export default function RootLayout() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <ThemeProvider
-        value={{
-          ...DarkTheme,
-          colors: { ...DarkTheme.colors, background: theme.colors.background },
-        }}
-      >
-        <PaperProvider theme={theme}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: theme.colors.background },
-              animation: "none",
-            }}
-          />
-        </PaperProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider
+          value={{
+            ...DarkTheme,
+            colors: { ...DarkTheme.colors, background: theme.colors.background },
+          }}
+        >
+          <PaperProvider theme={theme}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: theme.colors.background },
+                animation: "none",
+              }}
+            />
+          </PaperProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </View>
   );
 }

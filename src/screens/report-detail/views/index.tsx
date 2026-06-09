@@ -227,14 +227,18 @@ const ReportDetailView = ({
           {item.user ? (
             <View className="mt-4 flex-row items-center">
               <View
-                className="mr-3 h-12 w-12 items-center justify-center rounded-full"
+                className="mr-3 h-12 w-12 items-center justify-center rounded-full overflow-hidden"
                 style={{ backgroundColor: theme.colors.surfaceVariant }}
               >
-                <MaterialCommunityIcons
-                  name="account"
-                  size={24}
-                  color={theme.colors.primary}
-                />
+                {item.user?.profile_picture ? (
+                  <Image source={{ uri: item.user.profile_picture }} style={{ width: 48, height: 48 }} contentFit="cover" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="account"
+                    size={24}
+                    color={theme.colors.primary}
+                  />
+                )}
               </View>
               <View>
                 <Text className="text-base font-bold text-white">

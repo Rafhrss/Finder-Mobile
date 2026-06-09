@@ -7,7 +7,14 @@ module.exports = {
   ],
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["PlusJakartaSans-Regular", "sans-serif"],
+        medium: ["PlusJakartaSans-Medium", "sans-serif"],
+        semibold: ["PlusJakartaSans-SemiBold", "sans-serif"],
+        bold: ["PlusJakartaSans-Bold", "sans-serif"],
+      },
+    },
   },
   plugins: [],
 };

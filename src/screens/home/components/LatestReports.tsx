@@ -28,7 +28,7 @@ const LatestReports = ({ items, openDetail, jumpTo }: LatestReportsProps) => {
             Selengkapnya
           </Text>
           <MaterialCommunityIcons
-            name="chevron-right"
+            name="arrow-right"
             size={17}
             color={theme.colors.primary}
           />

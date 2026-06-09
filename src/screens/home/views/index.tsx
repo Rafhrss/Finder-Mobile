@@ -3,6 +3,7 @@ import type { ReportItem } from "@libs/types";
 import React, { useEffect, useState } from "react";
 import { ScrollView, View, Text } from "react-native";
 import LoadingOverlay from "@components/common/LoadingOverlay";
+import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import Carousel from "../components/Carousel";
 import LatestReports from "../components/LatestReports";
 import { HomeRepository } from "../repository";
@@ -15,30 +16,35 @@ interface HomeViewProps {
 const HomeView = ({ openDetail, jumpTo }: HomeViewProps) => {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const fetchReports = async () => {
+    try {
+      const data = await HomeRepository.getReports();
+      setReports(data);
+      setError(null);
+    } catch {
+      setError("Gagal memuat data laporan");
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
-    const fetchReports = async () => {
-      try {
-        setIsLoading(true);
-        const data = await HomeRepository.getReports();
-        if (isMounted) {
-          setReports(data);
-          setError(null);
-        }
-      } catch {
-        if (isMounted) setError("Gagal memuat data laporan");
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    fetchReports();
+    setIsLoading(true);
+    fetchReports().finally(() => {
+      if (isMounted) setIsLoading(false);
+    });
     return () => {
       isMounted = false;
     };
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchReports();
+    setRefreshing(false);
+  };
 
   if (isLoading) {
     return <LoadingOverlay />;
@@ -60,6 +66,12 @@ const HomeView = ({ openDetail, jumpTo }: HomeViewProps) => {
       className="flex-1"
       style={{ backgroundColor: theme.colors.background }}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <CustomRefreshControl 
+          refreshing={refreshing} 
+          onRefresh={onRefresh} 
+        />
+      }
     >
       <Carousel items={carouselItems} openDetail={openDetail} />
       <LatestReports items={latestReports} openDetail={openDetail} jumpTo={jumpTo} />

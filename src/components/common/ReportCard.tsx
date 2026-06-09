@@ -9,6 +9,7 @@ import {
 import type { ReportItem } from "@libs/types";
 import { formatDateString } from "@/src/utils/date";
 import { getStatusConfig } from "@/src/utils/status";
+import { theme } from "@libs/theme";
 
 interface ReportCardProps {
   item: ReportItem;
@@ -45,20 +46,32 @@ const ReportCard = ({ item, onPress }: ReportCardProps) => {
             </Chip>
           </View>
 
-          <View className="mb-3">
+          <View className="mb-3" style={{ height: 44 }}>
             <Text variant="bodyMedium" numberOfLines={2}>
               {item.description}
             </Text>
           </View>
 
           <View className="flex-row items-center gap-4">
-            <View className="flex-row items-center gap-1">
-              <Icon source="map-marker-outline" size={16} />
-              <Text variant="labelMedium">{item.location}</Text>
+            <View className="flex-row items-center gap-1 shrink">
+              <Icon source="map-marker-outline" size={16} color={theme.colors.onSurfaceVariant} />
+              <Text 
+                variant="labelMedium" 
+                style={{ color: theme.colors.onSurfaceVariant }}
+                numberOfLines={1}
+                className="shrink"
+              >
+                {item.location}
+              </Text>
             </View>
             <View className="flex-row items-center gap-1">
-              <Icon source="calendar-outline" size={16} />
-              <Text variant="labelMedium">{formatDateString(item.created_at)}</Text>
+              <Icon source="calendar-outline" size={16} color={theme.colors.onSurfaceVariant} />
+              <Text 
+                variant="labelMedium" 
+                style={{ color: theme.colors.onSurfaceVariant }}
+              >
+                {formatDateString(item.created_at)}
+              </Text>
             </View>
           </View>
         </PaperCard.Content>

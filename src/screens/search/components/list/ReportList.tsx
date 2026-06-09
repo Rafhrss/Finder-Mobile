@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { FlatList } from "react-native";
+import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import ReportCard from "@components/common/ReportCard";
 import type { ReportItem } from "@libs/types";
 
@@ -11,6 +12,15 @@ type ReportListProps = {
 
 const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => {
   const normalizedQuery = searchQuery.trim().toLowerCase();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // TODO: Connect to actual API fetch when integrated
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setRefreshing(false);
+  };
+
   // Temporary empty array until API integration is complete in FU-19
   const reports: ReportItem[] = [];
   const filteredItems = reports.filter((item) => {
@@ -41,6 +51,12 @@ const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => 
       )}
       className="px-4 pt-3 pb-4"
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <CustomRefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      }
     />
   );
 };

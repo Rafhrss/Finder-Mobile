@@ -5,7 +5,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
 import type { ReportItem } from "@libs/types";
 import { Image } from "expo-image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import ImageView from "react-native-image-viewing";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ReportDetailRepository } from "../repository";
@@ -30,26 +31,36 @@ const ReportDetailView = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchDetail = useCallback(async () => {
+    try {
+      const data = await ReportDetailRepository.getReportDetail(
+        initialItem.id,
+      );
+      setItem(data);
+    } catch (error) {
+      // Silently fallback to initial item if failed
+      console.warn("Failed to fetch fresh report detail", error);
+    }
+  }, [initialItem.id]);
+
   useEffect(() => {
     let isMounted = true;
-    const fetchDetail = async () => {
-      try {
-        const data = await ReportDetailRepository.getReportDetail(
-          initialItem.id,
-        );
-        if (isMounted) setItem(data);
-      } catch (error) {
-        // Silently fallback to initial item if failed
-        console.warn("Failed to fetch fresh report detail", error);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-    fetchDetail();
+    setIsLoading(true);
+    fetchDetail().finally(() => {
+      if (isMounted) setIsLoading(false);
+    });
     return () => {
       isMounted = false;
     };
-  }, [initialItem.id]);
+  }, [fetchDetail]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchDetail();
+    setRefreshing(false);
+  };
 
   if (isLoading || !item) {
     return <LoadingOverlay />;
@@ -80,7 +91,16 @@ const ReportDetailView = ({
         </Text>
       </View>
 
-      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        className="flex-1 px-4" 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <CustomRefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      >
         {/* Image Placeholder or Actual Image */}
         <View
           className="mt-4 h-64 w-full items-center justify-center rounded-3xl overflow-hidden"

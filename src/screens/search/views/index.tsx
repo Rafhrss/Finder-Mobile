@@ -6,6 +6,8 @@ import ReportList from "../components/list/ReportList";
 import { convertStatus } from "../utils";
 import type { ReportItem } from "@libs/types";
 
+import { useDebounce } from "../hooks/useDebounce";
+
 const TAB_ITEMS = ["all", "lost", "found", "done"] as const;
 type TabKey = (typeof TAB_ITEMS)[number];
 type SearchProps = {
@@ -16,6 +18,7 @@ type SearchProps = {
 const Index = (props: SearchProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedQuery = useDebounce(searchQuery, 500);
 
   const layout = useWindowDimensions();
   const routes = useMemo(
@@ -45,7 +48,7 @@ const Index = (props: SearchProps) => {
           renderScene={({ route }) => (
             <ReportList
               activeTab={route.key as TabKey}
-              searchQuery={searchQuery}
+              searchQuery={debouncedQuery}
               openDetail={props.openDetail}
             />
           )}

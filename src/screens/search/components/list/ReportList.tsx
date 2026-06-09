@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { FlatList } from "react-native";
+import { FlatList, View, Text, ActivityIndicator } from "react-native";
 import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import ReportCard from "@components/common/ReportCard";
 import type { ReportItem } from "@libs/types";
+import { useSearchReports } from "../../hooks/useSearchReports";
 
 type ReportListProps = {
   activeTab: "all" | "lost" | "found" | "done";
@@ -11,37 +12,36 @@ type ReportListProps = {
 };
 
 const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => {
-  const normalizedQuery = searchQuery.trim().toLowerCase();
   const [refreshing, setRefreshing] = useState(false);
+  const { reports, isLoading, isError, mutate } = useSearchReports(searchQuery, activeTab);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // TODO: Connect to actual API fetch when integrated
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await mutate();
     setRefreshing(false);
   };
 
-  // Temporary empty array until API integration is complete in FU-19
-  const reports: ReportItem[] = [];
-  const filteredItems = reports.filter((item) => {
-    const matchedTab =
-      activeTab === "all"
-        ? true
-        : activeTab === "lost"
-          ? item.status === "lost"
-          : item.status === "found";
-    if (!matchedTab) return false;
-    if (!normalizedQuery) return true;
+  if (isLoading && reports.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center p-4">
+        <ActivityIndicator size="large" color="#0AF3B9" />
+      </View>
+    );
+  }
 
-    return [item.title, item.description, item.location, item.category]
-      .join(" ")
-      .toLowerCase()
-      .includes(normalizedQuery);
-  });
+  if (isError) {
+    return (
+      <View className="flex-1 items-center justify-center p-4">
+        <Text className="text-[#FCA5A5] text-center font-medium">
+          Gagal memuat data pencarian. Silakan coba lagi.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <FlatList
-      data={filteredItems}
+      data={reports}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <ReportCard
@@ -56,6 +56,14 @@ const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => 
           refreshing={refreshing}
           onRefresh={onRefresh}
         />
+      }
+      ListEmptyComponent={
+        <View className="flex-1 items-center justify-center p-8 mt-10">
+          <Text className="text-white text-lg font-bold mb-2">Tidak ditemukan</Text>
+          <Text className="text-[#9CA3AF] text-center">
+            Pencarian untuk &quot;{searchQuery}&quot; tidak membuahkan hasil.
+          </Text>
+        </View>
       }
     />
   );

@@ -1,12 +1,17 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
-import type { ReportItem } from "@libs/dummyData";
-import React, { useRef, useState } from "react";
+import type { ReportItem } from "@libs/types";
+import { formatDateString } from "@/src/utils/date";
+import { getStatusConfig } from "@/src/utils/status";
+import { Image } from "expo-image";
+import { Chip } from "react-native-paper";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -24,10 +29,30 @@ const Carousel = ({ items, openDetail }: CarouselProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const flatListRef = useRef<FlatList<ReportItem>>(null);
 
+  // Auto-slide effect
+  useEffect(() => {
+    if (items.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setActiveSlide((prevSlide) => {
+        const nextSlide = (prevSlide + 1) % items.length;
+        flatListRef.current?.scrollToOffset({
+          offset: nextSlide * CAROUSEL_CARD_WIDTH,
+          animated: true,
+        });
+        return nextSlide;
+      });
+    }, 4000); // 4 seconds interval
+
+    return () => clearInterval(interval);
+  }, [items.length, activeSlide]);
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / CAROUSEL_CARD_WIDTH);
-    setActiveSlide(index);
+    if (index !== activeSlide) {
+      setActiveSlide(index);
+    }
   };
 
   const scrollToIndex = (index: number) => {
@@ -39,103 +64,101 @@ const Carousel = ({ items, openDetail }: CarouselProps) => {
   };
 
   const renderCarouselItem = ({ item }: { item: ReportItem }) => {
-    const isLost = item.status === "lost";
+    const statusConfig = getStatusConfig(item.status);
+
+    const userName = item.user?.name || "ANONYMOUS";
+    const initial = userName.charAt(0).toUpperCase();
+
     return (
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => openDetail(item)}
-        style={{ width: CAROUSEL_CARD_WIDTH }}
+        style={{ width: CAROUSEL_CARD_WIDTH, height: 200 }}
         className="px-1"
       >
-        <View
-          className="overflow-hidden rounded-2xl"
-          style={{
-            backgroundColor: theme.colors.surfaceVariant,
-            borderWidth: 1,
-            borderColor: theme.colors.outline,
-          }}
-        >
-          {/* Date Badge */}
-          <View
-            className="absolute left-3 top-3 z-10 rounded-full px-3 py-1.5"
-            style={{
-              backgroundColor: theme.colors.background,
-              borderWidth: 1,
-              borderColor: theme.colors.outline,
-            }}
-          >
-            <Text className="text-xs font-medium text-white">
-              {item.created_at.length > 6 ? item.created_at : `19 april 2026`}
-            </Text>
+        <View className="h-full w-full overflow-hidden rounded-[20px]" style={{ backgroundColor: theme.colors.surfaceVariant }}>
+          {/* Background Image */}
+          {item.image ? (
+            <Image
+              source={item.image}
+              style={StyleSheet.absoluteFillObject}
+              contentFit="cover"
+            />
+          ) : (
+            <View style={[StyleSheet.absoluteFillObject, { alignItems: 'center', justifyContent: 'center' }]}>
+              <MaterialCommunityIcons name="image-outline" size={48} color={theme.colors.outline} />
+            </View>
+          )}
+
+          {/* Dark Overlay for better text readability */}
+          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: "rgba(15, 23, 42, 0.75)" }]} />
+
+          {/* Top Left Badge */}
+          <View className="absolute left-4 top-4">
+            <Chip
+              compact
+              mode="outlined"
+              icon={statusConfig.icon}
+              theme={{
+                colors: {
+                  primary: statusConfig.color,
+                  surface: `${statusConfig.color}40`, // Slightly darker for overlay
+                  onSurfaceVariant: statusConfig.color,
+                  outline: "transparent",
+                },
+              }}
+            >
+              {statusConfig.label}
+            </Chip>
           </View>
 
-          {/* Image Placeholder */}
-          <View className="h-36 w-full items-center justify-center">
-            <MaterialCommunityIcons
-              name="image-outline"
-              size={48}
-              color={theme.colors.outline}
-            />
-          </View>
-
-          {/* Arrow Navigation Hints */}
+          {/* Left Arrow */}
           <TouchableOpacity
-            className="absolute left-1 top-1/2 -translate-y-4"
-            onPress={() =>
-              scrollToIndex(
-                activeSlide > 0 ? activeSlide - 1 : items.length - 1
-              )
-            }
+            className="absolute left-3 top-1/2 -translate-y-5 h-10 w-10 items-center justify-center rounded-full"
+            style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            onPress={() => scrollToIndex(activeSlide > 0 ? activeSlide - 1 : items.length - 1)}
           >
-            <MaterialCommunityIcons
-              name="chevron-left"
-              size={28}
-              color={theme.colors.onSurfaceVariant}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="absolute right-1 top-1/2 -translate-y-4"
-            onPress={() =>
-              scrollToIndex(
-                activeSlide < items.length - 1 ? activeSlide + 1 : 0
-              )
-            }
-          >
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={28}
-              color={theme.colors.onSurfaceVariant}
-            />
+            <MaterialCommunityIcons name="chevron-left" size={24} color="#FFFFFF" />
           </TouchableOpacity>
 
-          {/* Bottom Info */}
-          <View className="px-4 pb-4 pt-2">
-            <View className="flex-row items-center">
-              <View
-                className="mr-3 h-10 w-10 items-center justify-center rounded-full"
-                style={{ backgroundColor: theme.colors.background }}
-              >
-                <MaterialCommunityIcons
-                  name="account-outline"
-                  size={22}
-                  color={theme.colors.primary}
-                />
-              </View>
-              <View className="flex-1">
-                <Text
-                  className="text-xs font-bold uppercase"
-                  style={{
-                    color: isLost ? "#EF4444" : theme.colors.primary,
-                  }}
-                >
-                  {isLost ? "HILANG" : "DITEMUKAN"}
-                </Text>
-                <Text
-                  className="text-base font-bold text-white"
-                  numberOfLines={1}
-                >
-                  {item.title}
-                </Text>
+          {/* Right Arrow */}
+          <TouchableOpacity
+            className="absolute right-3 top-1/2 -translate-y-5 h-10 w-10 items-center justify-center rounded-full"
+            style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            onPress={() => scrollToIndex(activeSlide < items.length - 1 ? activeSlide + 1 : 0)}
+          >
+            <MaterialCommunityIcons name="chevron-right" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          {/* Bottom Content */}
+          <View className="absolute bottom-5 left-16 right-16 flex-row items-center">
+            {/* Avatar */}
+            <View className="h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "#F97316" }}>
+              <Text className="text-2xl font-semibold text-white">{initial}</Text>
+            </View>
+
+            {/* Info */}
+            <View className="ml-3 flex-1">
+              <Text className="text-[10px] font-bold text-gray-300 uppercase" numberOfLines={1}>
+                {userName}
+              </Text>
+              <Text className="mt-0.5 text-xl font-bold text-white" numberOfLines={1}>
+                {item.title}
+              </Text>
+              
+              <View className="mt-1 flex-row items-center">
+                <View className="flex-row items-center">
+                  <MaterialCommunityIcons name="map-marker-outline" size={12} color="#9CA3AF" />
+                  <Text className="ml-1 text-xs text-gray-400" numberOfLines={1} style={{ maxWidth: 100 }}>
+                    {item.location}
+                  </Text>
+                </View>
+                <View className="ml-3 flex-row items-center">
+                  <MaterialCommunityIcons name="calendar-outline" size={12} color="#9CA3AF" />
+                  <Text className="ml-1 text-xs text-gray-400">
+                    {formatDateString(item.created_at)}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
@@ -143,6 +166,8 @@ const Carousel = ({ items, openDetail }: CarouselProps) => {
       </TouchableOpacity>
     );
   };
+
+  if (!items || items.length === 0) return null;
 
   return (
     <View className="mt-4">
@@ -160,31 +185,9 @@ const Carousel = ({ items, openDetail }: CarouselProps) => {
         decelerationRate="fast"
         contentContainerStyle={{ paddingHorizontal: 16 }}
       />
-
-      {/* Dots Indicator */}
-      <View className="mt-3 flex-row items-center justify-center">
-        {items.map((_, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() => scrollToIndex(index)}
-            className="mx-1"
-          >
-            <View
-              className="rounded-full"
-              style={{
-                width: activeSlide === index ? 10 : 8,
-                height: activeSlide === index ? 10 : 8,
-                backgroundColor:
-                  activeSlide === index
-                    ? theme.colors.primary
-                    : theme.colors.outline,
-              }}
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
     </View>
   );
 };
 
 export default Carousel;
+

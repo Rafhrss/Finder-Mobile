@@ -3,7 +3,7 @@ import {
   GoogleSignin,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
-import axios from "axios";
+import { isAxiosError } from "axios";
 import React from "react";
 import { Alert, Image, TouchableOpacity, View } from "react-native";
 import { Text } from "react-native-paper";
@@ -36,7 +36,7 @@ const LoginScreen = () => {
         );
       }
     } catch (error: any) {
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         const status = error.response?.status;
         let judul = "Gagal Masuk";
         let pesan =

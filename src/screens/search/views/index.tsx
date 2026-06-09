@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { useWindowDimensions, View } from "react-native";
-import { Searchbar, useTheme } from "react-native-paper";
+import { Searchbar } from "react-native-paper";
 import { TabBar, TabView } from "react-native-tab-view";
 import ReportList from "../components/list/ReportList";
 import { convertStatus } from "../utils";
-import type { ReportItem } from "@libs/dummyData";
+import type { ReportItem } from "@libs/types";
 
 const TAB_ITEMS = ["all", "lost", "found", "done"] as const;
 type TabKey = (typeof TAB_ITEMS)[number];
@@ -17,7 +17,6 @@ const Index = (props: SearchProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { colors } = useTheme();
   const layout = useWindowDimensions();
   const routes = useMemo(
     () =>

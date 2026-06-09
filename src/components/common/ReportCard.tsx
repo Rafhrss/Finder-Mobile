@@ -5,9 +5,10 @@ import {
   Icon,
   Card as PaperCard,
   Text,
-  useTheme,
 } from "react-native-paper";
-import type { ReportItem } from "@libs/dummyData";
+import type { ReportItem } from "@libs/types";
+import { formatDateString } from "@/src/utils/date";
+import { getStatusConfig } from "@/src/utils/status";
 
 interface ReportCardProps {
   item: ReportItem;
@@ -15,9 +16,7 @@ interface ReportCardProps {
 }
 
 const ReportCard = ({ item, onPress }: ReportCardProps) => {
-  const { colors } = useTheme();
-  const isLost = item.status === "lost";
-  const statusLabel = isLost ? "Hilang" : "Ditemukan";
+  const statusConfig = getStatusConfig(item.status);
 
   return (
     <View className="mb-4">
@@ -32,16 +31,17 @@ const ReportCard = ({ item, onPress }: ReportCardProps) => {
             <Chip
               compact
               mode="outlined"
-              icon={isLost ? "alert-circle-outline" : "check-circle-outline"}
+              icon={statusConfig.icon}
               theme={{
                 colors: {
-                  surface: isLost ? "#EF444429" : `${colors.primary}29`,
-                  onSurfaceVariant: isLost ? "#EF4444" : colors.primary,
+                  primary: statusConfig.color,
+                  surface: `${statusConfig.color}29`, // 16% opacity
+                  onSurfaceVariant: statusConfig.color,
                   outline: "transparent",
                 },
               }}
             >
-              {statusLabel}
+              {statusConfig.label}
             </Chip>
           </View>
 
@@ -58,7 +58,7 @@ const ReportCard = ({ item, onPress }: ReportCardProps) => {
             </View>
             <View className="flex-row items-center gap-1">
               <Icon source="calendar-outline" size={16} />
-              <Text variant="labelMedium">{item.created_at}</Text>
+              <Text variant="labelMedium">{formatDateString(item.created_at)}</Text>
             </View>
           </View>
         </PaperCard.Content>

@@ -2,6 +2,7 @@ export type UserInfo = {
   id: string;
   email: string;
   name: string;
+  profile_picture: string | null;
 };
 
 export type ReportItem = {

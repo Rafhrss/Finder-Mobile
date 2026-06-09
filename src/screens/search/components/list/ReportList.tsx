@@ -13,12 +13,18 @@ type ReportListProps = {
 
 const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => {
   const [refreshing, setRefreshing] = useState(false);
-  const { reports, isLoading, isError, mutate } = useSearchReports(searchQuery, activeTab);
+  const { reports, isLoading, isError, mutate, size, setSize, isLoadingMore, isReachingEnd } = useSearchReports(searchQuery, activeTab);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await mutate();
     setRefreshing(false);
+  };
+
+  const loadMore = () => {
+    if (!isLoadingMore && !isReachingEnd) {
+      setSize(size + 1);
+    }
   };
 
   if (isLoading && reports.length === 0) {
@@ -29,7 +35,7 @@ const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => 
     );
   }
 
-  if (isError) {
+  if (isError && reports.length === 0) {
     return (
       <View className="flex-1 items-center justify-center p-4">
         <Text className="text-[#FCA5A5] text-center font-medium">
@@ -56,6 +62,15 @@ const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => 
           refreshing={refreshing}
           onRefresh={onRefresh}
         />
+      }
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={
+        isLoadingMore && !isReachingEnd ? (
+          <View className="py-4">
+            <ActivityIndicator size="small" color="#0AF3B9" />
+          </View>
+        ) : null
       }
       ListEmptyComponent={
         <View className="flex-1 items-center justify-center p-8 mt-10">

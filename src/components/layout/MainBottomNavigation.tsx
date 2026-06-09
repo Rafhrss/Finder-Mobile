@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
-import type { ReportItem } from "@libs/dummyData";
+import type { ReportItem } from "@libs/types";
 import React, { useState, useCallback, useEffect } from "react";
 import { Animated, BackHandler, View, Alert } from "react-native";
 import { BottomNavigation } from "react-native-paper";
@@ -109,7 +109,7 @@ const MainBottomNavigation = () => {
   }) => {
     switch (route.key) {
       case "home":
-        return <HomeScreen openDetail={openDetail} />;
+        return <HomeScreen jumpTo={jumpTo} openDetail={openDetail} />;
       case "search":
         return <SearchScreen jumpTo={jumpTo} openDetail={openDetail} />;
       case "report":

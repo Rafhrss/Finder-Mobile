@@ -1,7 +1,7 @@
 import React from "react";
 import { FlatList } from "react-native";
 import ReportCard from "@components/common/ReportCard";
-import { DUMMY_ITEMS, type ReportItem } from "@libs/dummyData";
+import type { ReportItem } from "@libs/types";
 
 type ReportListProps = {
   activeTab: "all" | "lost" | "found" | "done";
@@ -11,7 +11,9 @@ type ReportListProps = {
 
 const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => {
   const normalizedQuery = searchQuery.trim().toLowerCase();
-  const filteredItems = DUMMY_ITEMS.filter((item) => {
+  // Temporary empty array until API integration is complete in FU-19
+  const reports: ReportItem[] = [];
+  const filteredItems = reports.filter((item) => {
     const matchedTab =
       activeTab === "all"
         ? true

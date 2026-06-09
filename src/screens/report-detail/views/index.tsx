@@ -1,20 +1,61 @@
+import { formatDateString } from "@/src/utils/date";
+import { getStatusConfig } from "@/src/utils/status";
+import LoadingOverlay from "@components/common/LoadingOverlay";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
-import type { ReportItem } from "@libs/dummyData";
-import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import type { ReportItem } from "@libs/types";
+import { Image } from "expo-image";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import ImageView from "react-native-image-viewing";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ReportDetailRepository } from "../repository";
 
 interface ReportDetailViewProps {
   item: ReportItem;
   onBack: () => void;
 }
 
-const ReportDetailView = ({ item, onBack }: ReportDetailViewProps) => {
-  const isLost = item.status === "lost";
-  const statusColor = isLost ? "#EF4444" : theme.colors.primary;
-  const statusLabel = isLost ? "Hilang" : "Ditemukan";
-  const statusIcon = isLost ? "alert-circle-outline" : "check-circle-outline";
+const ReportDetailView = ({
+  item: initialItem,
+  onBack,
+}: ReportDetailViewProps) => {
+  const [item, setItem] = useState<ReportItem>(initialItem);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isImageModalVisible, setIsImageModalVisible] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDetail = async () => {
+      try {
+        const data = await ReportDetailRepository.getReportDetail(
+          initialItem.id,
+        );
+        if (isMounted) setItem(data);
+      } catch (error) {
+        // Silently fallback to initial item if failed
+        console.warn("Failed to fetch fresh report detail", error);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    fetchDetail();
+    return () => {
+      isMounted = false;
+    };
+  }, [initialItem.id]);
+
+  if (isLoading || !item) {
+    return <LoadingOverlay />;
+  }
+
+  const statusConfig = getStatusConfig(item.status);
 
   return (
     <SafeAreaView
@@ -22,34 +63,48 @@ const ReportDetailView = ({ item, onBack }: ReportDetailViewProps) => {
       style={{ backgroundColor: theme.colors.background }}
     >
       {/* Header */}
-      <View className="flex-row items-center px-4 py-3">
+      <View className="flex-row items-center px-4 pb-3">
         <TouchableOpacity
           onPress={onBack}
-          className="h-10 w-10 items-center justify-center rounded-full"
+          className="h-12 w-12 items-center justify-center rounded-full"
           style={{ backgroundColor: theme.colors.surfaceVariant }}
         >
           <MaterialCommunityIcons
             name="chevron-left"
-            size={24}
+            size={20}
             color={theme.colors.primary}
           />
         </TouchableOpacity>
-        <Text className="ml-4 text-lg font-semibold text-white">
+        <Text className="ml-3 text-base font-semibold text-white">
           Detail Barang
         </Text>
       </View>
 
       <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-        {/* Image Placeholder */}
+        {/* Image Placeholder or Actual Image */}
         <View
-          className="mt-4 h-64 w-full items-center justify-center rounded-3xl"
+          className="mt-4 h-64 w-full items-center justify-center rounded-3xl overflow-hidden"
           style={{ backgroundColor: theme.colors.surfaceVariant }}
         >
-          <MaterialCommunityIcons
-            name="image-outline"
-            size={64}
-            color={theme.colors.outline}
-          />
+          {item.image ? (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => setIsImageModalVisible(true)}
+              className="h-full w-full"
+            >
+              <Image
+                source={item.image}
+                style={{ width: "100%", height: "100%" }}
+                contentFit="cover"
+              />
+            </TouchableOpacity>
+          ) : (
+            <MaterialCommunityIcons
+              name="image-outline"
+              size={64}
+              color={theme.colors.outline}
+            />
+          )}
 
           {/* Photo Count Badge */}
           <View
@@ -65,36 +120,42 @@ const ReportDetailView = ({ item, onBack }: ReportDetailViewProps) => {
           </View>
         </View>
 
+        {isLoading && (
+          <ActivityIndicator
+            size="small"
+            color={theme.colors.primary}
+            style={{ marginTop: 16 }}
+          />
+        )}
+
         {/* Status and Date */}
         <View className="mt-6 flex-row items-center justify-between">
           <View
             className="flex-row items-center rounded-lg border px-3 py-1"
-            style={{ borderColor: statusColor }}
+            style={{ borderColor: statusConfig.color }}
           >
             <MaterialCommunityIcons
-              name={statusIcon}
+              name={statusConfig.icon}
               size={16}
-              color={statusColor}
+              color={statusConfig.color}
             />
             <Text
               className="ml-1 text-sm font-semibold"
-              style={{ color: statusColor }}
+              style={{ color: statusConfig.color }}
             >
-              {statusLabel}
+              {statusConfig.label}
             </Text>
           </View>
           <Text
             className="text-sm font-medium"
             style={{ color: theme.colors.onSurfaceVariant }}
           >
-            {item.created_at}
+            {formatDateString(item.created_at)}
           </Text>
         </View>
 
         {/* Title */}
-        <Text className="mt-4 text-2xl font-bold text-white">
-          {item.title}
-        </Text>
+        <Text className="mt-4 text-2xl font-bold text-white">{item.title}</Text>
 
         {/* Location Card */}
         <View
@@ -118,9 +179,7 @@ const ReportDetailView = ({ item, onBack }: ReportDetailViewProps) => {
             >
               TERAKHIR DILIHAT / LOKASI
             </Text>
-            <Text className="mt-0.5 text-base text-white">
-              {item.location}
-            </Text>
+            <Text className="mt-0.5 text-base text-white">{item.location}</Text>
           </View>
         </View>
 
@@ -145,7 +204,38 @@ const ReportDetailView = ({ item, onBack }: ReportDetailViewProps) => {
           <Text className="text-sm font-bold text-white">
             INFORMASI PELAPOR
           </Text>
-          {/* Add more info here if needed in the future */}
+          {item.user ? (
+            <View className="mt-4 flex-row items-center">
+              <View
+                className="mr-3 h-12 w-12 items-center justify-center rounded-full"
+                style={{ backgroundColor: theme.colors.surfaceVariant }}
+              >
+                <MaterialCommunityIcons
+                  name="account"
+                  size={24}
+                  color={theme.colors.primary}
+                />
+              </View>
+              <View>
+                <Text className="text-base font-bold text-white">
+                  {item.user.name}
+                </Text>
+                <Text
+                  className="text-sm"
+                  style={{ color: theme.colors.onSurfaceVariant }}
+                >
+                  {item.user.email}
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <Text
+              className="mt-2 text-sm italic"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
+              Informasi pelapor tidak tersedia untuk publik
+            </Text>
+          )}
         </View>
       </ScrollView>
 
@@ -171,6 +261,34 @@ const ReportDetailView = ({ item, onBack }: ReportDetailViewProps) => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Image Zoom Modal */}
+      {item.image && (
+        <ImageView
+          images={[{ uri: item.image }]}
+          imageIndex={0}
+          visible={isImageModalVisible}
+          onRequestClose={() => setIsImageModalVisible(false)}
+          animationType="fade"
+          swipeToCloseEnabled={true}
+          HeaderComponent={() => (
+            <SafeAreaView
+              edges={["top"]}
+              style={{ position: "absolute", width: "100%", zIndex: 10 }}
+            >
+              <View className="flex-row justify-end p-4">
+                <TouchableOpacity
+                  onPress={() => setIsImageModalVisible(false)}
+                  className="rounded-full p-2"
+                  style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                >
+                  <MaterialCommunityIcons name="close" size={24} color="#FFF" />
+                </TouchableOpacity>
+              </View>
+            </SafeAreaView>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 };

@@ -1,57 +1,21 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import React, { useCallback, useEffect, useState } from "react";
+import { Alert, Animated, DeviceEventEmitter, View } from "react-native";
+import { BottomNavigation } from "react-native-paper";
+
 import { theme } from "@libs/theme";
 import type { ReportItem } from "@libs/types";
-import React, { useState, useCallback, useEffect } from "react";
-import { Animated, BackHandler, View, Alert } from "react-native";
-import { BottomNavigation } from "react-native-paper";
 import { useAuth } from "../../contexts/AuthContext";
 
-import ChatScreen from "@/src/app/chat";
-import HomeScreen from "@/src/app/home";
-import ProfileScreen from "@/src/app/profile";
-import ReportScreen from "@/src/app/report";
-import SearchScreen from "@/src/app/search";
-import ReportDetailView from "@screens/report-detail/views";
+import ChatScreen from "@/src/app/(tabs)/chat";
+import HomeScreen from "@/src/app/(tabs)/home";
+import ProfileScreen from "@/src/app/(tabs)/profile";
+import ReportScreen from "@/src/app/(tabs)/report";
+import SearchScreen from "@/src/app/(tabs)/search";
 
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
-
-type RouteItem = {
-  key: string;
-  title?: string;
-  focusedIcon?: IconName;
-  unfocusedIcon?: IconName;
-};
-
-const routeScreen: RouteItem[] = [
-  {
-    key: "home",
-    title: "Beranda",
-    focusedIcon: "home",
-    unfocusedIcon: "home-outline",
-  },
-  {
-    key: "search",
-    title: "Cari",
-    focusedIcon: "magnify",
-  },
-  {
-    key: "report",
-    focusedIcon: "plus",
-    unfocusedIcon: "plus",
-  },
-  {
-    key: "chat",
-    title: "Chat",
-    focusedIcon: "chat",
-    unfocusedIcon: "chat-outline",
-  },
-  {
-    key: "profile",
-    title: "Profil",
-    focusedIcon: "account",
-    unfocusedIcon: "account-outline",
-  },
-];
+import { ReportDetailOverlay } from "./ReportDetailOverlay";
+import { routeScreen } from "./utils/navigation.constants";
+import { RouteItem } from "./utils/navigation.types";
 
 const MainBottomNavigation = () => {
   const { userToken } = useAuth();
@@ -85,85 +49,108 @@ const MainBottomNavigation = () => {
     });
   }, [slideAnim]);
 
-  // Intercept Android hardware back button when detail is open
+  // Listen to external tab switch events
   useEffect(() => {
-    if (!detailItem) return;
+    const sub = DeviceEventEmitter.addListener("JUMP_TO_TAB", (routeKey) => {
+      const newIndex = routes.findIndex((r) => r.key === routeKey);
+      if (newIndex >= 0) setIndex(newIndex);
+    });
+    return () => sub.remove();
+  }, [routes]);
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        closeDetail();
-        return true; // Prevent default (exit app)
-      },
-    );
+  const handleIndexChange = useCallback(
+    (newIndex: number) => {
+      const selectedRoute = routes[newIndex].key;
+      const requiresAuth =
+        selectedRoute === "report" || selectedRoute === "chat";
 
-    return () => backHandler.remove();
-  }, [detailItem, closeDetail]);
+      if (requiresAuth && !userToken) {
+        Alert.alert(
+          "Akses Ditolak",
+          "Anda harus login terlebih dahulu untuk mengakses halaman ini.",
+        );
+        const profileIndex = routes.findIndex((r) => r.key === "profile");
+        setIndex(profileIndex);
+      } else {
+        setIndex(newIndex);
+      }
+    },
+    [routes, userToken],
+  );
 
-  const renderScene = ({
-    route,
-    jumpTo,
-  }: {
-    route: RouteItem;
-    jumpTo: (key: string) => void;
-  }) => {
-    switch (route.key) {
-      case "home":
-        return <HomeScreen jumpTo={jumpTo} openDetail={openDetail} />;
-      case "search":
-        return <SearchScreen jumpTo={jumpTo} openDetail={openDetail} />;
-      case "report":
-        return <ReportScreen />;
-      case "chat":
-        return <ChatScreen />;
-      case "profile":
-        return <ProfileScreen />;
-      default:
-        return null;
-    }
-  };
+  const renderScene = useCallback(
+    ({
+      route,
+      jumpTo,
+    }: {
+      route: RouteItem;
+      jumpTo: (key: string) => void;
+    }) => {
+      switch (route.key) {
+        case "home":
+          return <HomeScreen jumpTo={jumpTo} openDetail={openDetail} />;
+        case "search":
+          return <SearchScreen jumpTo={jumpTo} openDetail={openDetail} />;
+        case "report":
+          return <ReportScreen />;
+        case "chat":
+          return <ChatScreen />;
+        case "profile":
+          return <ProfileScreen />;
+        default:
+          return null;
+      }
+    },
+    [openDetail],
+  );
+
+  const renderIcon = useCallback(
+    ({
+      route,
+      focused,
+      color,
+    }: {
+      route: RouteItem;
+      focused: boolean;
+      color: string;
+    }) => {
+      const iconName = focused
+        ? route.focusedIcon
+        : (route.unfocusedIcon ?? route.focusedIcon);
+
+      if (route.key === "report") {
+        return (
+          <View
+            className="-mt-3 h-16 w-16 items-center justify-center rounded-full"
+            style={{ backgroundColor: theme.colors.primary }}
+          >
+            <MaterialCommunityIcons
+              name={iconName as any}
+              size={30}
+              color={theme.colors.background}
+            />
+          </View>
+        );
+      }
+
+      return (
+        <MaterialCommunityIcons
+          name={iconName as any}
+          size={28}
+          color={color}
+        />
+      );
+    },
+    [],
+  );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View className="flex-1">
       <BottomNavigation
         navigationState={{ index, routes }}
-        onIndexChange={(newIndex) => {
-          const selectedRoute = routes[newIndex].key;
-          
-          if ((selectedRoute === "report" || selectedRoute === "chat") && !userToken) {
-            Alert.alert("Akses Ditolak", "Anda harus login terlebih dahulu untuk mengakses halaman ini.");
-            // Arahkan ke profile (yang isinya halaman login)
-            const profileIndex = routes.findIndex(r => r.key === "profile");
-            setIndex(profileIndex);
-          } else {
-            setIndex(newIndex);
-          }
-        }}
-        renderScene={renderScene}
-        renderIcon={({ route, focused, color }) => {
-          const iconName = focused
-            ? route.focusedIcon
-            : (route.unfocusedIcon ?? route.focusedIcon);
-
-          if (route.key === "report") {
-            return (
-              <View
-                className="-mt-3 h-16 w-16 items-center justify-center rounded-full"
-                style={{ backgroundColor: theme.colors.primary }}
-              >
-                <MaterialCommunityIcons
-                  name={iconName}
-                  size={30}
-                  color={theme.colors.background}
-                />
-              </View>
-            );
-          }
-
-          return (
-            <MaterialCommunityIcons name={iconName} size={28} color={color} />
-          );
-        }}
+        onIndexChange={handleIndexChange}
+        renderScene={renderScene as any}
+        renderIcon={renderIcon as any}
         activeIndicatorStyle={{ backgroundColor: "transparent" }}
         activeColor={theme.colors.primary}
         inactiveColor={theme.colors.onSurfaceVariant}
@@ -174,29 +161,11 @@ const MainBottomNavigation = () => {
         }}
       />
 
-      {/* Detail Overlay — rendered on top, no Stack navigation */}
-      {detailItem && (
-        <Animated.View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: theme.colors.background,
-            transform: [
-              {
-                translateX: slideAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 400],
-                }),
-              },
-            ],
-          }}
-        >
-          <ReportDetailView item={detailItem} onBack={closeDetail} />
-        </Animated.View>
-      )}
+      <ReportDetailOverlay
+        detailItem={detailItem}
+        slideAnim={slideAnim}
+        closeDetail={closeDetail}
+      />
     </View>
   );
 };

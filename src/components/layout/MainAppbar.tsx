@@ -1,33 +1,144 @@
-import React, { useState, useEffect } from "react";
-import { Image, View } from "react-native";
-import { Appbar, Avatar, useTheme } from "react-native-paper";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Alert,
+  DeviceEventEmitter,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Appbar, Avatar, Divider, Menu, useTheme } from "react-native-paper";
+import { useAuth } from "../../contexts/AuthContext";
 
-const MainAppbar = () => {
-  const { colors } = useTheme();
+// --- Custom Hook for Google User ---
+const useGoogleUser = (userToken: string | null) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const userInfo = await GoogleSignin.getCurrentUser();
-        setUser(userInfo);
-      } catch (error) {
-        console.error(error);
+      if (userToken) {
+        try {
+          const userInfo = await GoogleSignin.getCurrentUser();
+          setUser(userInfo);
+        } catch (error) {
+          console.error("Failed to fetch Google user:", error);
+        }
+      } else {
+        setUser(null);
       }
     };
     fetchUser();
-  }, []);
+  }, [userToken]);
+
+  return user;
+};
+
+// --- Sub-component: User Menu ---
+type UserMenuProps = {
+  user: User | null;
+  userToken: string | null;
+  logout: () => Promise<void>;
+  colors: any;
+};
+
+const UserMenu = ({ user, userToken, logout, colors }: UserMenuProps) => {
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const openMenu = useCallback(() => setMenuVisible(true), []);
+  const closeMenu = useCallback(() => setMenuVisible(false), []);
+
+  const handleProfile = useCallback(() => {
+    closeMenu();
+    DeviceEventEmitter.emit("JUMP_TO_TAB", "profile");
+  }, [closeMenu]);
+
+  const handleLogout = useCallback(() => {
+    closeMenu();
+    Alert.alert("Konfirmasi Logout", "Anda ingin keluar dari akun ini?", [
+      { text: "Batal", style: "cancel" },
+      {
+        text: "Keluar",
+        style: "destructive",
+        onPress: logout,
+      },
+    ]);
+  }, [closeMenu, logout]);
+
+  const firstName = user?.user?.name?.split(" ")[0] || "Pengguna";
+
+  return (
+    <View className="mr-3">
+      <Menu
+        visible={menuVisible}
+        onDismiss={closeMenu}
+        anchorPosition="bottom"
+        style={{ marginTop: 4 }}
+        anchor={
+          <TouchableOpacity onPress={openMenu}>
+            {user?.user?.photo ? (
+              <Avatar.Image size={34} source={{ uri: user.user.photo }} />
+            ) : (
+              <Avatar.Icon size={34} icon="account" />
+            )}
+          </TouchableOpacity>
+        }
+        contentStyle={{ backgroundColor: colors.surfaceVariant }}
+      >
+        {userToken ? (
+          <>
+            <View className="px-4 py-3">
+              <Text
+                className="text-base font-bold"
+                style={{ color: colors.onSurface }}
+              >
+                {firstName}
+              </Text>
+            </View>
+            <Divider />
+            <Menu.Item
+              onPress={handleProfile}
+              title="Profil"
+              leadingIcon="account-outline"
+              titleStyle={{ color: colors.onSurfaceVariant }}
+            />
+            <Divider />
+            <Menu.Item
+              onPress={handleLogout}
+              title="Logout"
+              leadingIcon="logout"
+              titleStyle={{ color: colors.error }}
+            />
+          </>
+        ) : (
+          <Menu.Item
+            onPress={handleProfile}
+            title="Login"
+            leadingIcon="login"
+            titleStyle={{ color: colors.primary }}
+          />
+        )}
+      </Menu>
+    </View>
+  );
+};
+
+// --- Main Appbar ---
+const MainAppbar = () => {
+  const { colors } = useTheme();
+  const { logout, userToken } = useAuth();
+  const user = useGoogleUser(userToken);
 
   return (
     <Appbar.Header
       mode="small"
       style={{ backgroundColor: colors.surfaceVariant }}
     >
-      <View className="ml-1 mr-1">
+      <View className="mx-1">
         <Image
           source={require("@assets/images/icon_3.png")}
-          style={{ width: 70, height: 70, resizeMode: "contain" }}
+          className="h-[70px] w-[70px]"
+          resizeMode="contain"
         />
       </View>
       <Appbar.Content
@@ -35,13 +146,12 @@ const MainAppbar = () => {
         color={colors.onSurfaceVariant}
         titleStyle={{ fontWeight: "bold", fontSize: 18 }}
       />
-      <View className="mr-3">
-        {user?.user?.photo ? (
-          <Avatar.Image size={34} source={{ uri: user.user.photo }} />
-        ) : (
-          <Avatar.Icon size={34} icon="account" />
-        )}
-      </View>
+      <UserMenu
+        user={user}
+        userToken={userToken}
+        logout={logout}
+        colors={colors}
+      />
     </Appbar.Header>
   );
 };

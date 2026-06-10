@@ -155,7 +155,7 @@ const ReportDetailView = ({
             style={{ borderColor: statusConfig.color }}
           >
             <MaterialCommunityIcons
-              name={statusConfig.icon}
+              name={statusConfig.icon as any}
               size={16}
               color={statusConfig.color}
             />

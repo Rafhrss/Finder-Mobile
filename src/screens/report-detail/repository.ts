@@ -8,4 +8,14 @@ export const ReportDetailRepository = {
     const { data } = await api.get(`${this.endpoint}/${id}/`);
     return data;
   },
+
+  async updateReport(id: string, formData: FormData, token: string): Promise<ReportItem> {
+    const { data } = await api.patch(`${this.endpoint}/${id}/`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `Token ${token}`
+      },
+    });
+    return data;
+  },
 };

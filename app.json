@@ -14,6 +14,7 @@
     },
     "android": {
       "package": "com.findermobile.app",
+      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "backgroundColor": "#060E17",
         "foregroundImage": "./assets/images/icon_3.png"

@@ -17,6 +17,8 @@ import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import ImageView from "react-native-image-viewing";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ReportDetailRepository } from "../repository";
+import { useAuthProfile } from "@/src/hooks/useAuthProfile";
+import { EditReportModal } from "./EditReportModal";
 
 interface ReportDetailViewProps {
   item: ReportItem;
@@ -30,8 +32,13 @@ const ReportDetailView = ({
   const [item, setItem] = useState<ReportItem>(initialItem);
   const [isLoading, setIsLoading] = useState(true);
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
+  
+  const { user: currentUser } = useAuthProfile();
+  
+  const isCreator = currentUser?.email === item?.user?.email;
 
   const fetchDetail = useCallback(async () => {
     try {
@@ -74,21 +81,37 @@ const ReportDetailView = ({
       style={{ backgroundColor: theme.colors.background }}
     >
       {/* Header */}
-      <View className="flex-row items-center px-4 pb-3">
-        <TouchableOpacity
-          onPress={onBack}
-          className="h-12 w-12 items-center justify-center rounded-full"
-          style={{ backgroundColor: theme.colors.surfaceVariant }}
-        >
-          <MaterialCommunityIcons
-            name="chevron-left"
-            size={20}
-            color={theme.colors.primary}
-          />
-        </TouchableOpacity>
-        <Text className="ml-3 text-base font-semibold text-white">
-          Detail Barang
-        </Text>
+      <View className="flex-row items-center justify-between px-4 pb-3">
+        <View className="flex-row items-center">
+          <TouchableOpacity
+            onPress={onBack}
+            className="h-12 w-12 items-center justify-center rounded-full"
+            style={{ backgroundColor: theme.colors.surfaceVariant }}
+          >
+            <MaterialCommunityIcons
+              name="chevron-left"
+              size={20}
+              color={theme.colors.primary}
+            />
+          </TouchableOpacity>
+          <Text className="ml-3 text-base font-semibold text-white">
+            Detail Barang
+          </Text>
+        </View>
+
+        {isCreator && (
+          <TouchableOpacity
+            onPress={() => setIsEditModalVisible(true)}
+            className="h-12 w-12 items-center justify-center rounded-full"
+            style={{ backgroundColor: theme.colors.primary + '20' }}
+          >
+            <MaterialCommunityIcons
+              name="pencil-outline"
+              size={20}
+              color={theme.colors.primary}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView 
@@ -126,18 +149,7 @@ const ReportDetailView = ({
             />
           )}
 
-          {/* Photo Count Badge */}
-          <View
-            className="absolute bottom-4 right-4 flex-row items-center rounded-lg px-2 py-1"
-            style={{ backgroundColor: theme.colors.background }}
-          >
-            <MaterialCommunityIcons
-              name="image-multiple-outline"
-              size={14}
-              color={theme.colors.onSurfaceVariant}
-            />
-            <Text className="ml-1 text-xs text-white">1 Foto</Text>
-          </View>
+
         </View>
 
         {isLoading && (
@@ -311,6 +323,19 @@ const ReportDetailView = ({
               </View>
             </SafeAreaView>
           )}
+        />
+      )}
+
+      {/* Edit Modal */}
+      {isCreator && (
+        <EditReportModal
+          visible={isEditModalVisible}
+          item={item}
+          onClose={() => setIsEditModalVisible(false)}
+          onSuccess={() => {
+            setIsEditModalVisible(false);
+            onRefresh();
+          }}
         />
       )}
     </SafeAreaView>

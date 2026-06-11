@@ -65,7 +65,7 @@ const UserMenu = ({ user, userToken, logout, colors }: UserMenuProps) => {
     ]);
   }, [closeMenu, logout]);
 
-  const firstName = user?.user?.name?.split(" ")[0] || "Pengguna";
+  const fullName = user?.user?.name || "Pengguna";
 
   return (
     <View className="mr-3">
@@ -92,7 +92,7 @@ const UserMenu = ({ user, userToken, logout, colors }: UserMenuProps) => {
                 className="text-base font-bold"
                 style={{ color: colors.onSurface }}
               >
-                {firstName}
+                {fullName}
               </Text>
             </View>
             <Divider />

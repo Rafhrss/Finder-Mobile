@@ -1,11 +1,24 @@
 import { useAuth } from "@/src/contexts/AuthContext";
+import { theme } from "@/src/libs/theme";
+import LoadingOverlay from "@components/common/LoadingOverlay";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { Image } from "expo-image";
 import React from "react";
-import { Alert, View } from "react-native";
-import { Button, Text } from "react-native-paper";
+import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
+import { Text } from "react-native-paper";
+import { useUserProfile } from "../hooks/useUserProfile";
 
 const UserProfile = () => {
-  const { logout } = useAuth();
+  const { userToken, logout } = useAuth();
+  const { user, isLoading } = useUserProfile(userToken);
+
+  // Hardcoded stats per user request
+  const stats = {
+    lost: 2,
+    found: 1,
+    claimed: 1,
+  };
 
   const handleLogout = async () => {
     Alert.alert("Logout", "Apakah Anda yakin ingin keluar?", [
@@ -25,18 +38,183 @@ const UserProfile = () => {
     ]);
   };
 
-  return (
-    <View className="flex-1 items-center justify-center bg-[#060E17] px-6">
-      <Text variant="headlineSmall" className="mb-4">
-        Profile Saya
-      </Text>
-      <Text variant="bodyMedium" className="mb-8 text-center">
-        Anda sudah berhasil login. Konten profil detail akan ditambahkan nanti.
-      </Text>
+  if (isLoading && !user) {
+    return <LoadingOverlay />;
+  }
 
-      <Button mode="contained" onPress={handleLogout} buttonColor="#D32F2F">
-        Keluar (Logout)
-      </Button>
+  return (
+    <View className="flex-1 bg-[#060E17]">
+      <ScrollView
+        className="flex-1 px-4 pt-4 pb-8"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* User Card */}
+        <View
+          className="items-center py-8 px-4 rounded-3xl mb-6"
+          style={{ backgroundColor: theme.colors.surfaceVariant }}
+        >
+          {user?.profile_picture ? (
+            <Image
+              source={{ uri: user.profile_picture }}
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: 40,
+                marginBottom: 16,
+              }}
+              contentFit="cover"
+            />
+          ) : (
+            <View
+              className="w-20 h-20 rounded-full items-center justify-center mb-4"
+              style={{ backgroundColor: theme.colors.primary }}
+            >
+              <MaterialCommunityIcons
+                name="account-outline"
+                size={40}
+                color="#060E17"
+              />
+            </View>
+          )}
+          <Text className="text-xl font-bold text-white mb-1">
+            {user?.name || "Pengguna"}
+          </Text>
+          <Text
+            className="text-sm font-medium"
+            style={{ color: theme.colors.primary }}
+          >
+            {user?.email || "-"}
+          </Text>
+        </View>
+
+        {/* Stats Row */}
+        <View className="flex-row gap-3 mb-8">
+          {/* Lost Stat */}
+          <View
+            className="flex-1 items-center justify-center py-4 rounded-2xl"
+            style={{ backgroundColor: theme.colors.surfaceVariant }}
+          >
+            <Text
+              className="text-xl font-bold mb-1"
+              style={{ color: "#EF4444" }}
+            >
+              {stats.lost}
+            </Text>
+            <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
+              Hilang
+            </Text>
+          </View>
+
+          {/* Found Stat */}
+          <View
+            className="flex-1 items-center justify-center py-4 rounded-2xl"
+            style={{ backgroundColor: theme.colors.surfaceVariant }}
+          >
+            <Text
+              className="text-xl font-bold mb-1"
+              style={{ color: "#F59E0B" }}
+            >
+              {stats.found}
+            </Text>
+            <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
+              Menemukan
+            </Text>
+          </View>
+
+          {/* Claimed Stat */}
+          <View
+            className="flex-1 items-center justify-center py-4 rounded-2xl"
+            style={{ backgroundColor: theme.colors.surfaceVariant }}
+          >
+            <Text
+              className="text-xl font-bold mb-1"
+              style={{ color: theme.colors.primary }}
+            >
+              {stats.claimed}
+            </Text>
+            <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
+              Selesai
+            </Text>
+          </View>
+        </View>
+
+        {/* Settings List */}
+        <Text className="text-xs font-bold text-white uppercase tracking-wider mb-4">
+          Pengaturan & Informasi
+        </Text>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          className="flex-row items-center justify-between p-4 rounded-2xl mb-3"
+          style={{ backgroundColor: theme.colors.surfaceVariant }}
+        >
+          <View className="flex-row items-center">
+            <View className="w-10 h-10 rounded-full bg-[#060E17] items-center justify-center mr-4">
+              <MaterialCommunityIcons
+                name="file-document-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+            </View>
+            <Text className="text-base font-medium text-white">
+              Daftar Laporanku
+            </Text>
+          </View>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={24}
+            color={theme.colors.outline}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          className="flex-row items-center justify-between p-4 rounded-2xl mb-3"
+          style={{ backgroundColor: theme.colors.surfaceVariant }}
+        >
+          <View className="flex-row items-center">
+            <View className="w-10 h-10 rounded-full bg-[#060E17] items-center justify-center mr-4">
+              <MaterialCommunityIcons
+                name="information-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+            </View>
+            <Text className="text-base font-medium text-white">
+              Tentang Aplikasi
+            </Text>
+          </View>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={24}
+            color={theme.colors.outline}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={handleLogout}
+          className="flex-row items-center justify-between p-4 rounded-2xl mb-8"
+          style={{ backgroundColor: theme.colors.surfaceVariant }}
+        >
+          <View className="flex-row items-center">
+            <View className="w-10 h-10 rounded-full bg-[#060E17] items-center justify-center mr-4">
+              <MaterialCommunityIcons name="logout" size={20} color="#EF4444" />
+            </View>
+            <Text
+              className="text-base font-medium"
+              style={{ color: "#EF4444" }}
+            >
+              Keluar Aplikasi
+            </Text>
+          </View>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={24}
+            color="#EF4444"
+          />
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };

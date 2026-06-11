@@ -147,6 +147,7 @@ const UserProfile = () => {
 
         <TouchableOpacity
           activeOpacity={0.8}
+          onPress={() => router.push('/my-reports')}
           className="flex-row items-center justify-between p-4 rounded-2xl mb-3"
           style={{ backgroundColor: theme.colors.surfaceVariant }}
         >

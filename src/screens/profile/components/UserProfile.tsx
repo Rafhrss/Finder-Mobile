@@ -3,6 +3,7 @@ import { theme } from "@/src/libs/theme";
 import LoadingOverlay from "@components/common/LoadingOverlay";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import React from "react";
 import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
@@ -10,6 +11,7 @@ import { Text } from "react-native-paper";
 import { useUserProfile } from "../hooks/useUserProfile";
 
 const UserProfile = () => {
+  const router = useRouter();
   const { userToken, logout } = useAuth();
   const { user, isLoading } = useUserProfile(userToken);
 
@@ -169,6 +171,7 @@ const UserProfile = () => {
 
         <TouchableOpacity
           activeOpacity={0.8}
+          onPress={() => router.push('/about')}
           className="flex-row items-center justify-between p-4 rounded-2xl mb-3"
           style={{ backgroundColor: theme.colors.surfaceVariant }}
         >

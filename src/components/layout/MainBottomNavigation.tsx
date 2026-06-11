@@ -119,18 +119,33 @@ const MainBottomNavigation = () => {
         : (route.unfocusedIcon ?? route.focusedIcon);
 
       if (route.key === "report") {
-        return (
-          <View
-            className="-mt-3 h-16 w-16 items-center justify-center rounded-full"
-            style={{ backgroundColor: theme.colors.primary }}
-          >
-            <MaterialCommunityIcons
-              name={iconName as any}
-              size={30}
-              color={theme.colors.background}
-            />
-          </View>
-        );
+        if (focused) {
+          return (
+            <View
+              className="-mt-3 h-16 w-16 items-center justify-center rounded-full"
+              style={{ backgroundColor: theme.colors.background, borderWidth: 3, borderColor: theme.colors.primary }}
+            >
+              <MaterialCommunityIcons
+                name="plus"
+                size={36}
+                color={theme.colors.primary}
+              />
+            </View>
+          );
+        } else {
+          return (
+            <View
+              className="-mt-3 h-16 w-16 items-center justify-center rounded-full"
+              style={{ backgroundColor: theme.colors.primary }}
+            >
+              <MaterialCommunityIcons
+                name="plus"
+                size={30}
+                color={theme.colors.background}
+              />
+            </View>
+          );
+        }
       }
 
       return (

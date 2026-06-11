@@ -1,23 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/src/contexts/AuthContext";
+import { api } from "@/src/libs/api"; // To fetch current user if needed
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { chatApi, ChatMessage, ChatUser } from "@libs/api-chat";
+import { theme } from "@libs/theme";
+import { useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  StatusBar,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  Alert,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useRouter } from "expo-router";
-import { theme } from "@libs/theme";
-import { chatApi, ChatMessage, ChatRoom, ChatUser } from "@libs/api-chat";
-import { useAuth } from "@/src/contexts/AuthContext";
-import { api } from "@/src/libs/api"; // To fetch current user if needed
 
 interface ChatRoomViewProps {
   roomId: string;
@@ -25,7 +25,11 @@ interface ChatRoomViewProps {
   otherUserName?: string;
 }
 
-const ChatRoomView: React.FC<ChatRoomViewProps> = ({ roomId, createdAt, otherUserName }) => {
+const ChatRoomView: React.FC<ChatRoomViewProps> = ({
+  roomId,
+  createdAt,
+  otherUserName,
+}) => {
   const router = useRouter();
   const { userToken } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -64,9 +68,12 @@ const ChatRoomView: React.FC<ChatRoomViewProps> = ({ roomId, createdAt, otherUse
         console.log("Fetching messages for room ID:", roomId);
         const fetchedMessages = await chatApi.getMessages(roomId);
         setMessages(fetchedMessages);
-
       } catch (error: any) {
-        console.error("Error fetching messages:", error.response?.status, error.response?.data || error.message);
+        console.error(
+          "Error fetching messages:",
+          error.response?.status,
+          error.response?.data || error.message,
+        );
         if (error.response?.status === 404) {
           Alert.alert("Error", `Chat tidak ditemukan (Room ID: ${roomId}).`);
           router.back();
@@ -94,7 +101,9 @@ const ChatRoomView: React.FC<ChatRoomViewProps> = ({ roomId, createdAt, otherUse
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
     } catch (error: any) {
-      if (error.response?.data?.detail === "Chat sudah readonly setelah 2 hari.") {
+      if (
+        error.response?.data?.detail === "Chat sudah readonly setelah 2 hari."
+      ) {
         setIsReadOnly(true);
         Alert.alert("Info", "Chat sudah readonly setelah 2 hari.");
       } else {
@@ -146,7 +155,9 @@ const ChatRoomView: React.FC<ChatRoomViewProps> = ({ roomId, createdAt, otherUse
             {item.message}
           </Text>
         </View>
-        <Text className="text-[10px] text-gray-500 mt-1 ml-1">{timeString}</Text>
+        <Text className="text-[10px] text-gray-500 mt-1 ml-1">
+          {timeString}
+        </Text>
       </View>
     );
   };
@@ -191,17 +202,10 @@ const ChatRoomView: React.FC<ChatRoomViewProps> = ({ roomId, createdAt, otherUse
             <View className="w-12 h-12 bg-[#2D4258] rounded-full items-center justify-center border-2 border-blue-500/30">
               <Text className="text-sm font-bold text-white">{initials}</Text>
             </View>
-            <View className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#121C26] rounded-full" />
           </View>
           <View>
             <Text className="text-white font-bold text-lg leading-tight">
               {displayName}
-            </Text>
-            <Text
-              className="text-xs font-medium"
-              style={{ color: theme.colors.primary }}
-            >
-              Online
             </Text>
           </View>
         </View>
@@ -222,7 +226,11 @@ const ChatRoomView: React.FC<ChatRoomViewProps> = ({ roomId, createdAt, otherUse
             data={messages}
             keyExtractor={(item) => item.id}
             renderItem={renderMessage}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24, paddingBottom: 16 }}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingTop: 24,
+              paddingBottom: 16,
+            }}
             showsVerticalScrollIndicator={false}
             onContentSizeChange={() =>
               flatListRef.current?.scrollToEnd({ animated: true })
@@ -267,15 +275,29 @@ const ChatRoomView: React.FC<ChatRoomViewProps> = ({ roomId, createdAt, otherUse
             onPress={handleSend}
             disabled={!inputText.trim() || isSending || isReadOnly}
             className="p-3 rounded-full items-center justify-center"
-            style={{ 
-              backgroundColor: inputText.trim() && !isReadOnly ? theme.colors.primary : '#2D4258',
-              opacity: isSending ? 0.7 : 1
+            style={{
+              backgroundColor:
+                inputText.trim() && !isReadOnly
+                  ? theme.colors.primary
+                  : "#2D4258",
+              opacity: isSending ? 0.7 : 1,
             }}
           >
             {isSending ? (
               <ActivityIndicator size="small" color="#050A10" />
             ) : (
-              <MaterialCommunityIcons name="send" size={20} color="#050A10" style={{ transform: [{ rotate: '-45deg' }, { translateX: 2 }, { translateY: -2 }] }} />
+              <MaterialCommunityIcons
+                name="send"
+                size={20}
+                color="#050A10"
+                style={{
+                  transform: [
+                    { rotate: "-45deg" },
+                    { translateX: 2 },
+                    { translateY: -2 },
+                  ],
+                }}
+              />
             )}
           </TouchableOpacity>
         </View>

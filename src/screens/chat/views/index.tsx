@@ -41,8 +41,9 @@ const ChatListView = () => {
       api.defaults.headers.common["Authorization"] = `Token ${userToken}`;
       const data = await chatApi.getRooms();
       setRooms(data || []);
-    } catch (error) {
-      console.error("Gagal mengambil daftar chat room:", error);
+    } catch (error: any) {
+      console.error("Gagal mengambil daftar chat room:", error.response?.data || error.message);
+      Alert.alert("Gagal Memuat Chat", error.response?.status === 404 ? "API Endpoint GET /chats/rooms/ belum tersedia di backend (404 Not Found)." : "Terjadi kesalahan saat mengambil data chat dari server.");
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -138,7 +139,6 @@ const ChatListView = () => {
               <Text className="text-sm font-bold text-white">{initials}</Text>
             </View>
           )}
-          <View className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#121C26] rounded-full" />
         </View>
 
         {/* Info */}

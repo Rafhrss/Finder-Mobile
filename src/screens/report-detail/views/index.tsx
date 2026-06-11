@@ -12,10 +12,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import ImageView from "react-native-image-viewing";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthProfile } from "@/src/hooks/useAuthProfile";
+import { useAuth } from "@/src/contexts/AuthContext";
+import { router } from "expo-router";
+import { chatApi } from "@libs/api-chat";
 import { EditReportModal } from "./EditReportModal";
 import { useReportDetail } from "../hooks/useReportDetail";
 
@@ -33,6 +36,7 @@ const ReportDetailView = ({
   const [refreshing, setRefreshing] = useState(false);
   
   const { user: currentUser } = useAuthProfile();
+  const { userToken } = useAuth();
   
   // Use SWR Hook instead of manual state
   const { item, mutate } = useReportDetail(initialItem.id, initialItem);
@@ -244,27 +248,50 @@ const ReportDetailView = ({
       </ScrollView>
 
       {/* Bottom Action Bar */}
-      <View
-        className="rounded-t-3xl px-4 py-4 pb-8"
-        style={{ backgroundColor: theme.colors.surfaceVariant }}
-      >
-        <TouchableOpacity
-          className="flex-row items-center justify-center rounded-2xl py-4"
-          style={{ backgroundColor: theme.colors.primary }}
+      {!isCreator && (
+        <View
+          className="rounded-t-3xl px-4 py-4 pb-8"
+          style={{ backgroundColor: theme.colors.surfaceVariant }}
         >
-          <MaterialCommunityIcons
-            name="chat-processing"
-            size={20}
-            color={theme.colors.onPrimary}
-          />
-          <Text
-            className="ml-2 text-base font-bold"
-            style={{ color: theme.colors.onPrimary }}
+          <TouchableOpacity
+            onPress={async () => {
+              try {
+                if (userToken) {
+                  const { api } = require("@libs/api");
+                  api.defaults.headers.common["Authorization"] = `Token ${userToken}`;
+                }
+                const room = await chatApi.createOrGetRoom(item.id);
+                router.push({
+                  pathname: "/chat/[id]",
+                  params: {
+                    id: room.id,
+                    createdAt: room.created_at,
+                    otherUserName: room.user1.name, // Since we are not the owner, the other user is the owner (user1)
+                  }
+                });
+              } catch (error: any) {
+                console.error("Gagal membuka chat room:", error.response?.data || error);
+                const { Alert } = require("react-native");
+                Alert.alert("Error", "Gagal membuka chat room. Silakan coba lagi.");
+              }
+            }}
+            className="flex-row items-center justify-center rounded-2xl py-4"
+            style={{ backgroundColor: theme.colors.primary }}
           >
-            Chat Pelapor
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <MaterialCommunityIcons
+              name="chat-processing"
+              size={20}
+              color={theme.colors.onPrimary}
+            />
+            <Text
+              className="ml-2 text-base font-bold"
+              style={{ color: theme.colors.onPrimary }}
+            >
+              Chat Pelapor
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Image Zoom Modal */}
       {item.image && (

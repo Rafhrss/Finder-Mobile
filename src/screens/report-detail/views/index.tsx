@@ -5,9 +5,8 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
 import type { ReportItem } from "@libs/types";
 import { Image } from "expo-image";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -16,9 +15,9 @@ import {
 import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import ImageView from "react-native-image-viewing";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ReportDetailRepository } from "../repository";
 import { useAuthProfile } from "@/src/hooks/useAuthProfile";
 import { EditReportModal } from "./EditReportModal";
+import { useReportDetail } from "../hooks/useReportDetail";
 
 interface ReportDetailViewProps {
   item: ReportItem;
@@ -29,59 +28,36 @@ const ReportDetailView = ({
   item: initialItem,
   onBack,
 }: ReportDetailViewProps) => {
-  const [item, setItem] = useState<ReportItem>(initialItem);
-  const [isLoading, setIsLoading] = useState(true);
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-
   const [refreshing, setRefreshing] = useState(false);
   
   const { user: currentUser } = useAuthProfile();
   
+  // Use SWR Hook instead of manual state
+  const { item, mutate } = useReportDetail(initialItem.id, initialItem);
+  
   const isCreator = currentUser?.email === item?.user?.email;
-
-  const fetchDetail = useCallback(async () => {
-    try {
-      const data = await ReportDetailRepository.getReportDetail(
-        initialItem.id,
-      );
-      setItem(data);
-    } catch (error) {
-      // Silently fallback to initial item if failed
-      console.warn("Failed to fetch fresh report detail", error);
-    }
-  }, [initialItem.id]);
-
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoading(true);
-    fetchDetail().finally(() => {
-      if (isMounted) setIsLoading(false);
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, [fetchDetail]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchDetail();
+    await mutate();
     setRefreshing(false);
   };
 
-  if (isLoading || !item) {
+  if (!item) {
     return <LoadingOverlay />;
   }
 
   const statusConfig = getStatusConfig(item.status);
 
   return (
-    <SafeAreaView
+    <View
       className="flex-1"
       style={{ backgroundColor: theme.colors.background }}
     >
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 pb-3">
+      <View className="flex-row items-center justify-between px-4 py-4">
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={onBack}
@@ -151,14 +127,6 @@ const ReportDetailView = ({
 
 
         </View>
-
-        {isLoading && (
-          <ActivityIndicator
-            size="small"
-            color={theme.colors.primary}
-            style={{ marginTop: 16 }}
-          />
-        )}
 
         {/* Status and Date */}
         <View className="mt-6 flex-row items-center justify-between">
@@ -338,7 +306,7 @@ const ReportDetailView = ({
           }}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 

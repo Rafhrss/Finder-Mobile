@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Animated, BackHandler } from "react-native";
 import { theme } from "@libs/theme";
 import type { ReportItem } from "@libs/types";
-import ReportDetailView from "@screens/report-detail/views";
+import ReportDetailView from "@screens/report/views/ReportDetailView";
 
 type ReportDetailOverlayProps = {
   detailItem: ReportItem | null;

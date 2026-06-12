@@ -15,11 +15,11 @@ const UserProfile = () => {
   const { userToken, logout } = useAuth();
   const { user, isLoading } = useUserProfile(userToken);
 
-  // Hardcoded stats per user request
+  // Use dynamic stats from user object, fallback to 0 if not available
   const stats = {
-    lost: 2,
-    found: 1,
-    claimed: 1,
+    lost: user?.statistics?.lost || 0,
+    found: user?.statistics?.found || 0,
+    claimed: user?.statistics?.claimed || 0,
   };
 
   const handleLogout = async () => {

@@ -3,6 +3,11 @@ export type UserInfo = {
   email: string;
   name: string;
   profile_picture: string | null;
+  statistics?: {
+    lost: number;
+    found: number;
+    claimed: number;
+  };
 };
 
 export type ReportItem = {

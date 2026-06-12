@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
 import type { ReportItem } from "@libs/types";
@@ -21,6 +22,7 @@ export const EditReportModal = ({
   onSuccess,
 }: EditReportModalProps) => {
   const { updateReport, isSubmitting } = useUpdateReport(item.id, onSuccess);
+  const insets = useSafeAreaInsets();
 
   const initialValues = {
     title: item.title,
@@ -39,7 +41,10 @@ export const EditReportModal = ({
       onRequestClose={onClose}
     >
       <View className="flex-1" style={{ backgroundColor: "#050A10" }}>
-        <View className="flex-row items-center justify-between px-4 pt-4 pb-2 bg-[#050A10]">
+        <View 
+          className="flex-row items-center justify-between px-4 pb-2 bg-[#050A10]"
+          style={{ paddingTop: Math.max(insets.top, 16) + 8 }}
+        >
           <Text className="text-2xl font-bold" style={{ color: theme.colors.primary }}>
             Edit Laporan
           </Text>

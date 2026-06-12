@@ -22,27 +22,33 @@ import { useAuth } from "@/src/contexts/AuthContext";
 import { router } from "expo-router";
 import { ChatRepository } from "../../chat/repository";
 import { EditReportModal } from "./EditReportModal";
-
 import { useReportDetail } from "../hooks/useReportDetail";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ReportDetailViewProps {
-  item: ReportItem;
+  reportId: string;
+  initialItem?: ReportItem;
   onBack: () => void;
+  withSafeArea?: boolean;
 }
 
 const ReportDetailView = ({
-  item: initialItem,
+  reportId,
+  initialItem,
   onBack,
+  withSafeArea = false,
 }: ReportDetailViewProps) => {
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  
+
+  const insets = useSafeAreaInsets();
+
   const { user: currentUser } = useAuthProfile();
   const { userToken } = useAuth();
   
   // Use SWR Hook instead of manual state
-  const { item, mutate } = useReportDetail(initialItem.id, initialItem);
+  const { item, mutate, error } = useReportDetail(reportId, initialItem);
   
   const isCreator = currentUser?.email === item?.user?.email;
 
@@ -51,6 +57,19 @@ const ReportDetailView = ({
     await mutate();
     setRefreshing(false);
   };
+
+  if (error) {
+    return (
+      <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.colors.background }}>
+        <MaterialCommunityIcons name="alert-circle-outline" size={48} color={theme.colors.error} />
+        <Text className="mt-4 text-white text-center">Gagal memuat detail laporan.</Text>
+        <Text className="mt-2 text-sm text-gray-400 text-center">{error.message || String(error)}</Text>
+        <TouchableOpacity onPress={() => onBack()} className="mt-4 bg-blue-500 px-4 py-2 rounded-full">
+          <Text className="text-white font-bold">Kembali</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   if (!item) {
     return <LoadingOverlay />;
@@ -64,7 +83,10 @@ const ReportDetailView = ({
       style={{ backgroundColor: theme.colors.background }}
     >
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-4">
+      <View 
+        className="flex-row items-center justify-between px-4 pb-4"
+        style={{ paddingTop: withSafeArea ? Math.max(insets.top, 16) + 8 : 16 }}
+      >
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={onBack}

@@ -27,7 +27,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
     >
       <View className="flex-1 relative justify-center mr-3">
         <TextInput
-          className="w-full bg-[#050A10] border-none text-gray-300 text-sm py-3 px-5 rounded-full"
+          className="w-full bg-[#1C2732] border-none text-gray-300 text-sm py-3 px-5 rounded-full"
           placeholder={isReadOnly ? "Chat Readonly" : "Ketik pesan..."}
           placeholderTextColor="#4B5563"
           value={inputText}

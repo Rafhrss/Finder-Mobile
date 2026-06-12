@@ -11,15 +11,18 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { api } from "@libs/api";
+
 import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import ImageView from "react-native-image-viewing";
 import { useAuthProfile } from "@/src/hooks/useAuthProfile";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { router } from "expo-router";
-import { chatApi } from "@libs/api-chat";
+import { ChatRepository } from "../../chat/repository";
 import { EditReportModal } from "./EditReportModal";
+
 import { useReportDetail } from "../hooks/useReportDetail";
 
 interface ReportDetailViewProps {
@@ -257,10 +260,9 @@ const ReportDetailView = ({
             onPress={async () => {
               try {
                 if (userToken) {
-                  const { api } = require("@libs/api");
                   api.defaults.headers.common["Authorization"] = `Token ${userToken}`;
                 }
-                const room = await chatApi.createOrGetRoom(item.id);
+                const room = await ChatRepository.createOrGetRoom(item.id);
                 router.push({
                   pathname: "/chat/[id]",
                   params: {
@@ -271,7 +273,6 @@ const ReportDetailView = ({
                 });
               } catch (error: any) {
                 console.error("Gagal membuka chat room:", error.response?.data || error);
-                const { Alert } = require("react-native");
                 Alert.alert("Error", "Gagal membuka chat room. Silakan coba lagi.");
               }
             }}
@@ -303,9 +304,8 @@ const ReportDetailView = ({
           animationType="fade"
           swipeToCloseEnabled={true}
           HeaderComponent={() => (
-            <SafeAreaView
-              edges={["top"]}
-              style={{ position: "absolute", width: "100%", zIndex: 10 }}
+            <View
+              style={{ position: "absolute", width: "100%", zIndex: 10, paddingTop: 48 }}
             >
               <View className="flex-row justify-end p-4">
                 <TouchableOpacity
@@ -316,7 +316,7 @@ const ReportDetailView = ({
                   <MaterialCommunityIcons name="close" size={24} color="#FFF" />
                 </TouchableOpacity>
               </View>
-            </SafeAreaView>
+            </View>
           )}
         />
       )}

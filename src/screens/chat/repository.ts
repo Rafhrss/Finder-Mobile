@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { api } from "@/src/libs/api";
 
 export interface ChatUser {
   id: string;
@@ -24,7 +24,7 @@ export interface ChatMessage {
   created_at: string;
 }
 
-export const chatApi = {
+export const ChatRepository = {
   // Create or retrieve a chat room for a report
   createOrGetRoom: async (reportId: string): Promise<ChatRoom> => {
     const response = await api.post(`/chats/reports/${reportId}/rooms/`);
@@ -48,4 +48,10 @@ export const chatApi = {
     const response = await api.post(`/chats/rooms/${roomId}/messages/`, { message });
     return response.data;
   },
+
+  // Get Current User ID
+  getCurrentUserId: async (): Promise<string> => {
+    const { data } = await api.get("/users/me/");
+    return data.id;
+  }
 };

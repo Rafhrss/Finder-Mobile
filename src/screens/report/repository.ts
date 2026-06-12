@@ -1,8 +1,18 @@
 import { api } from "@/src/libs/api";
 import type { ReportItem } from "@/src/libs/types";
 
-export const ReportDetailRepository = {
+export const ReportRepository = {
   endpoint: "/reports",
+
+  async createReport(formData: FormData, token: string) {
+    api.defaults.headers.common["Authorization"] = `Token ${token}`;
+    const { data } = await api.post(`${this.endpoint}/`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return data;
+  },
 
   async getReportDetail(id: string): Promise<ReportItem> {
     const { data } = await api.get(`${this.endpoint}/${id}/`);

@@ -1,0 +1,18 @@
+export const PREDEFINED_LOCATIONS = [
+  "Apotek UMKT",
+  "Gedung A",
+  "Gedung B",
+  "Gedung C",
+  "Gedung D",
+  "Gedung E",
+  "Gedung F",
+  "Gedung G",
+  "Lapangan Kotak",
+  "Perpustakaan",
+  "Parkiran Gedung A",
+  "Parkiran Gedung D",
+  "Parkiran Gedung E",
+  "Parkiran Gedung F",
+  "Parkiran Gedung G",
+  "Lokasi Lainnya",
+];

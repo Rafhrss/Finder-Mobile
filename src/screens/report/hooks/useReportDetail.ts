@@ -1,11 +1,11 @@
 import useSWR from 'swr';
-import { ReportDetailRepository } from '../repository';
+import { ReportRepository } from '../repository';
 import type { ReportItem } from '@/src/libs/types';
 
 export const useReportDetail = (id: string, initialData?: ReportItem) => {
   const { data, mutate: swrMutate, ...rest } = useSWR<ReportItem>(
     ['/reports', id],
-    () => ReportDetailRepository.getReportDetail(id),
+    () => ReportRepository.getReportDetail(id),
     {
       fallbackData: initialData,
     }

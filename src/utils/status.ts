@@ -25,7 +25,7 @@ export const getStatusConfig = (status: string): StatusConfig => {
     case "CLAIMED":
       return {
         label: "Selesai",
-        color: theme.colors.primary, // Success (Greenish / Primary)
+        color: "#10B981", // Success (Green)
         icon: "check-circle-outline",
       };
     default:

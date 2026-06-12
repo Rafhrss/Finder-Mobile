@@ -154,6 +154,8 @@ const ChatListView = () => {
               id: item.id,
               createdAt: item.created_at,
               otherUserName: otherUser?.name,
+              otherUserAvatar: otherUser?.profile_picture,
+              reportId: typeof item.report === 'object' ? (item.report as any).id : item.report,
             },
           });
         }}
@@ -278,12 +280,16 @@ export interface ChatRoomViewProps {
   roomId: string;
   createdAt?: string;
   otherUserName?: string;
+  otherUserAvatar?: string | null;
+  reportId?: string;
 }
 
 export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
   roomId,
   createdAt,
   otherUserName,
+  otherUserAvatar,
+  reportId,
 }) => {
   const router = useRouter();
 
@@ -360,6 +366,8 @@ export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
         displayName={displayName}
         initials={initials}
         topInset={insets.top}
+        profilePicture={otherUserAvatar}
+        reportId={reportId}
       />
 
       {/* Messages */}

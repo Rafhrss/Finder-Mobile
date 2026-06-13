@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Modal,
@@ -15,6 +14,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
 import * as ImagePicker from "expo-image-picker";
 import { PREDEFINED_LOCATIONS } from "../../constants";
+import LoadingOverlay from "@/src/components/common/LoadingOverlay";
 
 export interface ReportFormData {
   status: "LOST" | "FOUND" | "CLAIMED";
@@ -46,7 +46,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
   const [customLocation, setCustomLocation] = useState(
     initialValues?.customLocation || ""
   );
-  const [description, setDescription] = useState(initialValues?.description || "");
+  const [description, setDescription] = useState(initialValues?.description || "Warna :\nJumlah :\nMerk :\nUkuran :");
   const [image, setImage] = useState<string | null>(initialValues?.image || null);
 
   const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
@@ -116,13 +116,13 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               <TouchableOpacity
                 onPress={() => setStatus("CLAIMED")}
                 className={`flex-1 py-3 rounded-xl border ${
-                  status === "CLAIMED" ? "border-suc" : "border-transparent"
+                  status === "CLAIMED" ? "border-[#10B981]" : "border-transparent"
                 }`}
                 style={{ backgroundColor: "#13212E" }}
               >
                 <Text
                   className={`text-center font-medium ${
-                    status === "CLAIMED" ? "text-primary" : "text-[#8E9BA7]"
+                    status === "CLAIMED" ? "text-[#10B981]" : "text-[#8E9BA7]"
                   }`}
                 >
                   Selesai
@@ -198,13 +198,12 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               </Text>
               <TextInput
                 mode="outlined"
-                placeholder="Warna :&#10;Jumlah :&#10;Merk :&#10;Ukuran :"
                 value={description}
                 onChangeText={setDescription}
                 multiline
-                numberOfLines={5}
+                numberOfLines={6}
                 outlineStyle={{ borderRadius: 12, borderWidth: 0 }}
-                style={{ backgroundColor: "#101C26" }}
+                style={{ backgroundColor: "#101C26", minHeight: 140 }}
                 textColor="white"
                 placeholderTextColor="#8E9BA7"
                 activeOutlineColor={theme.colors.primary}
@@ -215,7 +214,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
             <TouchableOpacity
               onPress={pickImage}
               activeOpacity={0.7}
-              className="rounded-2xl h-32 flex-col items-center justify-center p-4 border-2 border-dashed mb-6 overflow-hidden"
+              className="rounded-2xl h-48 flex-col items-center justify-center border-2 border-dashed mb-6 overflow-hidden relative"
               style={{
                 backgroundColor: "rgba(16, 28, 38, 0.3)",
                 borderColor: "#1E2D3D",
@@ -225,17 +224,17 @@ export const ReportForm: React.FC<ReportFormProps> = ({
                 <>
                   <Image
                     source={{ uri: image }}
-                    className="absolute w-full h-full opacity-60"
+                    className="absolute w-full h-full"
                     resizeMode="cover"
                   />
-                  <View className="bg-black/50 p-2 rounded-lg items-center">
+                  <View className="absolute top-2 right-2 bg-black/50 p-2 rounded-lg flex-row items-center">
                     <MaterialCommunityIcons
-                      name="image-edit"
-                      size={24}
-                      color={theme.colors.primary}
+                      name="pencil"
+                      size={16}
+                      color="#FFF"
                     />
-                    <Text className="text-white font-bold text-sm mt-1">
-                      Ganti Foto
+                    <Text className="text-white font-bold text-xs ml-1">
+                      Ubah
                     </Text>
                   </View>
                 </>
@@ -262,7 +261,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               }}
             >
               {isSubmitting ? (
-                <ActivityIndicator color="#050A10" />
+                <LoadingOverlay size="small" transparent />
               ) : (
                 <Text className="font-bold text-lg" style={{ color: "#050A10" }}>
                   {submitLabel}

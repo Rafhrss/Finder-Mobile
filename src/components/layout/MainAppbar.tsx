@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { Appbar, Avatar, Divider, Menu, useTheme } from "react-native-paper";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useAuth } from "../../contexts/AuthContext";
 
 // --- Custom Hook for Google User ---
@@ -60,7 +61,10 @@ const UserMenu = ({ user, userToken, logout, colors }: UserMenuProps) => {
       {
         text: "Keluar",
         style: "destructive",
-        onPress: logout,
+        onPress: async () => {
+          await logout();
+          DeviceEventEmitter.emit("JUMP_TO_TAB", "profile");
+        },
       },
     ]);
   }, [closeMenu, logout]);
@@ -106,8 +110,8 @@ const UserMenu = ({ user, userToken, logout, colors }: UserMenuProps) => {
             <Menu.Item
               onPress={handleLogout}
               title="Logout"
-              leadingIcon="logout"
-              titleStyle={{ color: colors.error }}
+              leadingIcon={(props) => <MaterialCommunityIcons {...props} name="logout" color="#EF4444" />}
+              titleStyle={{ color: "#EF4444" }}
             />
           </>
         ) : (

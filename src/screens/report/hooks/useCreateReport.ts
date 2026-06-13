@@ -60,7 +60,6 @@ export const useCreateReport = () => {
           text: "OK",
           onPress: () => {
             DeviceEventEmitter.emit("JUMP_TO_TAB", "home");
-            router.replace("/");
           },
         },
       ]);

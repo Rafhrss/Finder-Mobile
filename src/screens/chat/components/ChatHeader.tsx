@@ -22,7 +22,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 
   return (
     <View
-      className="bg-[#121C26] px-4 pb-4 rounded-b-[2.5rem] flex-row items-center justify-between shadow-lg z-10"
+      className="bg-[#121C26] px-4 pb-4 rounded-b-3xl flex-row items-center justify-between shadow-lg z-10"
       style={{ paddingTop: Math.max(topInset, 0) + 16 }}
     >
       <View className="flex-row items-center flex-1">

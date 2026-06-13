@@ -3,10 +3,10 @@ import { useAuthProfile } from "@/src/hooks/useAuthProfile";
 import { api } from "@/src/libs/api";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
+import { formatDateString } from "@/src/utils/date";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import LoadingOverlay from "@/src/components/common/LoadingOverlay";
 import { Searchbar } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChatHeader } from "../components/ChatHeader";
@@ -40,6 +41,8 @@ const ChatListView = () => {
     async (showLoadingIndicator = true) => {
       if (!userToken) {
         setIsLoading(false);
+        setRooms([]);
+        setSearchQuery("");
         return;
       }
 
@@ -231,9 +234,7 @@ const ChatListView = () => {
 
         {/* Chat List */}
         {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
+          <LoadingOverlay transparent />
         ) : (
           <FlatList
             data={filteredRooms}
@@ -376,17 +377,42 @@ export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        ) : (
+        <LoadingOverlay transparent />
+      ) : (
           <FlatList
             ref={flatListRef}
             data={messages}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <ChatMessageBubble item={item} currentUserId={currentUserId} />
-            )}
+            renderItem={({ item, index }) => {
+              const currentDate = new Date(item.created_at);
+              const isToday = currentDate.toDateString() === new Date().toDateString();
+              const dateLabel = isToday ? "HARI INI" : formatDateString(item.created_at);
+
+              let showDate = false;
+              if (index === 0) {
+                showDate = true;
+              } else {
+                const prevDate = new Date(messages[index - 1].created_at);
+                if (currentDate.toDateString() !== prevDate.toDateString()) {
+                  showDate = true;
+                }
+              }
+
+              return (
+                <View>
+                  {showDate && (
+                    <View className="flex-row justify-center mb-6 mt-2">
+                      <View className="bg-[#1C2732] px-3 py-1 rounded-lg">
+                        <Text className="text-[#8E9BA7] text-xs font-medium">
+                          {dateLabel}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                  <ChatMessageBubble item={item} currentUserId={currentUserId} />
+                </View>
+              );
+            }}
             contentContainerStyle={{
               paddingHorizontal: 16,
               paddingTop: 24,
@@ -396,17 +422,7 @@ export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
             onContentSizeChange={() =>
               flatListRef.current?.scrollToEnd({ animated: true })
             }
-            ListHeaderComponent={
-              messages.length > 0 ? (
-                <View className="flex-row justify-center mb-6">
-                  <View className="bg-[#1C2732] px-4 py-1.5 rounded-lg">
-                    <Text className="text-xs text-gray-400 uppercase tracking-wider font-semibold">
-                      Hari Ini
-                    </Text>
-                  </View>
-                </View>
-              ) : null
-            }
+            ListHeaderComponent={null}
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center mt-10">
                 <Text className="text-gray-500">Belum ada pesan.</Text>

@@ -1,6 +1,7 @@
 import React from "react";
-import { View, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, TextInput, TouchableOpacity } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import LoadingOverlay from "@/src/components/common/LoadingOverlay";
 import { theme } from "@libs/theme";
 
 interface ChatInputBarProps {
@@ -22,45 +23,39 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
 }) => {
   return (
     <View
-      className="bg-[#121C26] px-4 pt-4 rounded-t-[2.5rem] shadow-lg flex-row items-center"
-      style={{ paddingBottom: Math.max(bottomInset, 16) + 8 }}
+      className="bg-transparent px-2 pt-2 flex-row items-center"
+      style={{ paddingBottom: Math.max(bottomInset, 16) }}
     >
-      <View className="flex-1 relative justify-center mr-3">
+      <View className="flex-1 flex-row items-center bg-[#1F2C34] rounded-full mr-2 h-[48px] px-5">
         <TextInput
-          className="w-full bg-[#1C2732] border-none text-gray-300 text-sm py-3 px-5 rounded-full"
-          placeholder={isReadOnly ? "Chat Readonly" : "Ketik pesan..."}
-          placeholderTextColor="#4B5563"
+          className="flex-1 border-none text-white text-lg"
+          placeholder={isReadOnly ? "Chat Readonly" : "Message"}
+          placeholderTextColor="#8696A0"
           value={inputText}
           onChangeText={setInputText}
           editable={!isReadOnly}
-          onSubmitEditing={handleSend}
+          multiline={false}
         />
       </View>
 
       <TouchableOpacity
         onPress={handleSend}
         disabled={!inputText.trim() || isSending || isReadOnly}
-        className="p-3 rounded-full items-center justify-center"
+        className="h-[48px] w-[48px] rounded-full items-center justify-center"
         style={{
           backgroundColor:
-            inputText.trim() && !isReadOnly ? theme.colors.primary : "#2D4258",
+            inputText.trim() && !isReadOnly ? "#00A884" : "#1F2C34",
           opacity: isSending ? 0.7 : 1,
         }}
       >
         {isSending ? (
-          <ActivityIndicator size="small" color="#050A10" />
+          <LoadingOverlay size="small" transparent />
         ) : (
           <MaterialCommunityIcons
             name="send"
-            size={20}
-            color="#050A10"
-            style={{
-              transform: [
-                { rotate: "-45deg" },
-                { translateX: 2 },
-                { translateY: -2 },
-              ],
-            }}
+            size={24}
+            color={inputText.trim() && !isReadOnly ? "white" : "#8696A0"}
+            style={{ transform: [{ translateX: 2 }] }}
           />
         )}
       </TouchableOpacity>

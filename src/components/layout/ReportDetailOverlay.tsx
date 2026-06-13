@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
-import { Animated, BackHandler } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "@libs/theme";
 import type { ReportItem } from "@libs/types";
 import ReportDetailView from "@screens/report/views/ReportDetailView";
+import React, { useEffect } from "react";
+import { Animated, BackHandler } from "react-native";
 
 type ReportDetailOverlayProps = {
   detailItem: ReportItem | null;
@@ -18,8 +17,6 @@ export const ReportDetailOverlay = ({
   closeDetail,
   withSafeArea = false,
 }: ReportDetailOverlayProps) => {
-  const insets = useSafeAreaInsets();
-
   // Intercept Android hardware back button when detail is open
   useEffect(() => {
     if (!detailItem) return;
@@ -52,7 +49,12 @@ export const ReportDetailOverlay = ({
         ],
       }}
     >
-      <ReportDetailView reportId={detailItem.id} initialItem={detailItem} onBack={closeDetail} withSafeArea={withSafeArea} />
+      <ReportDetailView
+        reportId={detailItem.id}
+        initialItem={detailItem}
+        onBack={closeDetail}
+        withSafeArea={withSafeArea}
+      />
     </Animated.View>
   );
 };

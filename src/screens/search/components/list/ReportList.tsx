@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FlatList, View, Text, ActivityIndicator } from "react-native";
+import { FlatList, View, Text } from "react-native";
+import LoadingOverlay from "@/src/components/common/LoadingOverlay";
 import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import ReportCard from "@components/common/ReportCard";
 import type { ReportItem } from "@libs/types";
@@ -29,8 +30,8 @@ const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => 
 
   if (isLoading && reports.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center p-4">
-        <ActivityIndicator size="large" color="#0AF3B9" />
+      <View className="flex-1 items-center justify-center">
+        <LoadingOverlay transparent />
       </View>
     );
   }
@@ -68,7 +69,7 @@ const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => 
       ListFooterComponent={
         isLoadingMore && !isReachingEnd ? (
           <View className="py-4">
-            <ActivityIndicator size="small" color="#0AF3B9" />
+            <LoadingOverlay size="small" transparent />
           </View>
         ) : null
       }

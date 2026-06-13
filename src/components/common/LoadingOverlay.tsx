@@ -1,6 +1,7 @@
 import { theme } from "@/src/libs/theme";
+import loadingGif from "@assets/lottie/loader.gif";
 import React from "react";
-import { ActivityIndicator, View } from "react-native";
+import { Image, View } from "react-native";
 
 interface LoadingOverlayProps {
   size?: "small" | "large";
@@ -10,19 +11,32 @@ interface LoadingOverlayProps {
 
 const LoadingOverlay = ({
   size = "large",
-  color = theme.colors.primary,
   transparent = false,
 }: LoadingOverlayProps) => {
+  const dimension = size === "small" ? 24 : 100;
+
   return (
     <View
-      className="flex-1 items-center justify-center"
+      className={
+        size === "large"
+          ? "flex-1 items-center justify-center"
+          : "items-center justify-center"
+      }
       style={{
-        backgroundColor: transparent ? "transparent" : theme.colors.background,
+        backgroundColor: transparent
+          ? "transparent"
+          : size === "large"
+            ? theme.colors.background
+            : "transparent",
       }}
     >
-      <ActivityIndicator size={size} color={color} />
+      <Image
+        source={loadingGif}
+        style={{ width: dimension, height: dimension }}
+        resizeMode="contain"
+      />
     </View>
   );
 };
 
-export default LoadingOverlay;
+export default React.memo(LoadingOverlay);

@@ -1,7 +1,7 @@
 import ReportView from "@screens/report/views";
 
-const report = () => {
+const ReportScreen = () => {
   return <ReportView />;
 };
 
-export default report;
+export default ReportScreen;

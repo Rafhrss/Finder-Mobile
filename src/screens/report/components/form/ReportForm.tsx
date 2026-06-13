@@ -200,6 +200,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
                 mode="outlined"
                 value={description}
                 onChangeText={setDescription}
+                maxLength={1000}
                 multiline
                 numberOfLines={6}
                 outlineStyle={{ borderRadius: 12, borderWidth: 0 }}

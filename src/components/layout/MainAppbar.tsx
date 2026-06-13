@@ -12,6 +12,8 @@ import { Appbar, Avatar, Divider, Menu, useTheme } from "react-native-paper";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useAuth } from "../../contexts/AuthContext";
 
+import { useAuthProfile } from "@/src/hooks/useAuthProfile";
+
 // --- Custom Hook for Google User ---
 const useGoogleUser = (userToken: string | null) => {
   const [user, setUser] = useState<User | null>(null);
@@ -132,6 +134,7 @@ const MainAppbar = () => {
   const { colors } = useTheme();
   const { logout, userToken } = useAuth();
   const user = useGoogleUser(userToken);
+  const { user: authUser } = useAuthProfile();
 
   return (
     <Appbar.Header
@@ -150,6 +153,11 @@ const MainAppbar = () => {
         color={colors.onSurfaceVariant}
         titleStyle={{ fontWeight: "bold", fontSize: 18 }}
       />
+      {authUser?.is_admin && (
+        <View className="bg-red-500/20 border border-red-500/50 px-2 py-0.5 rounded-md mr-3">
+          <Text className="text-red-500 text-[10px] font-bold tracking-wider">ADMIN</Text>
+        </View>
+      )}
       <UserMenu
         user={user}
         userToken={userToken}

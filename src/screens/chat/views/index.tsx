@@ -424,8 +424,12 @@ export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
             }
             ListHeaderComponent={null}
             ListEmptyComponent={
-              <View className="flex-1 items-center justify-center mt-10">
-                <Text className="text-gray-500">Belum ada pesan.</Text>
+              <View className="flex-1 items-center justify-center mt-10 px-6">
+                <MaterialCommunityIcons name="information-outline" size={48} color="#8E9BA7" className="mb-4" />
+                <Text className="text-gray-300 text-lg font-semibold mt-4 text-center">Belum ada pesan</Text>
+                <Text className="text-[#8E9BA7] text-sm text-center mt-2 leading-5">
+                  Pesan hanya dapat dikirim dalam waktu 48 jam pertama. Chat akan otomatis terkunci (Read-Only) setelah 2 hari dan riwayat obrolan akan dihapus secara permanen setelah 7 hari.
+                </Text>
               </View>
             }
           />

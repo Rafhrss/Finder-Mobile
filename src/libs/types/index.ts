@@ -3,6 +3,7 @@ export type UserInfo = {
   email: string;
   name: string;
   profile_picture: string | null;
+  is_admin?: boolean;
   statistics?: {
     lost: number;
     found: number;

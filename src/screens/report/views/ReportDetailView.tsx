@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  DeviceEventEmitter,
 } from "react-native";
 import { api } from "@libs/api";
 
@@ -24,6 +25,7 @@ import { ChatRepository } from "../../chat/repository";
 import { EditReportModal } from "./EditReportModal";
 import { useReportDetail } from "../hooks/useReportDetail";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ReportRepository } from "../repository";
 
 interface ReportDetailViewProps {
   reportId: string;
@@ -41,6 +43,8 @@ const ReportDetailView = ({
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isNavigatingChat, setIsNavigatingChat] = useState(false);
 
   const insets = useSafeAreaInsets();
 
@@ -51,11 +55,41 @@ const ReportDetailView = ({
   const { item, mutate, error } = useReportDetail(reportId, initialItem);
   
   const isCreator = currentUser?.email === item?.user?.email;
+  const isAdmin = currentUser?.is_admin === true;
+  const canEditOrDelete = isCreator || isAdmin;
 
   const onRefresh = async () => {
     setRefreshing(true);
     await mutate();
     setRefreshing(false);
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Hapus Laporan",
+      "Apakah Anda yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.",
+      [
+        { text: "Batal", style: "cancel" },
+        {
+          text: "Hapus",
+          style: "destructive",
+          onPress: async () => {
+            if (!userToken) return;
+            setIsDeleting(true);
+            try {
+              await ReportRepository.deleteReport(reportId, userToken);
+              Alert.alert("Berhasil", "Laporan telah dihapus.");
+              onBack();
+            } catch (error) {
+              console.error("Failed to delete report:", error);
+              Alert.alert("Error", "Gagal menghapus laporan.");
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (error) {
@@ -104,18 +138,33 @@ const ReportDetailView = ({
           </Text>
         </View>
 
-        {isCreator && (
-          <TouchableOpacity
-            onPress={() => setIsEditModalVisible(true)}
-            className="h-12 w-12 items-center justify-center rounded-full"
-            style={{ backgroundColor: theme.colors.primary + '20' }}
-          >
-            <MaterialCommunityIcons
-              name="pencil-outline"
-              size={20}
-              color={theme.colors.primary}
-            />
-          </TouchableOpacity>
+        {canEditOrDelete && (
+          <View className="flex-row">
+            <TouchableOpacity
+              onPress={() => setIsEditModalVisible(true)}
+              className="h-12 w-12 items-center justify-center rounded-full mr-2"
+              style={{ backgroundColor: theme.colors.primary + '20' }}
+              disabled={isDeleting}
+            >
+              <MaterialCommunityIcons
+                name="pencil-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDelete}
+              className="h-12 w-12 items-center justify-center rounded-full"
+              style={{ backgroundColor: '#EF4444' + '20' }}
+              disabled={isDeleting}
+            >
+              <MaterialCommunityIcons
+                name="delete-outline"
+                size={20}
+                color="#EF4444"
+              />
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 
@@ -201,7 +250,7 @@ const ReportDetailView = ({
               color={theme.colors.primary}
             />
           </View>
-          <View className="ml-3">
+          <View className="ml-3 flex-1">
             <Text
               className="text-xs font-bold"
               style={{ color: theme.colors.onSurfaceVariant }}
@@ -280,10 +329,17 @@ const ReportDetailView = ({
         >
           <TouchableOpacity
             onPress={async () => {
+              if (!userToken) {
+                onBack();
+                setTimeout(() => {
+                  DeviceEventEmitter.emit("JUMP_TO_TAB", "profile");
+                }, 250);
+                return;
+              }
+              if (isNavigatingChat) return;
+              setIsNavigatingChat(true);
               try {
-                if (userToken) {
-                  api.defaults.headers.common["Authorization"] = `Token ${userToken}`;
-                }
+                api.defaults.headers.common["Authorization"] = `Token ${userToken}`;
                 const room = await ChatRepository.createOrGetRoom(item.id);
                 router.push({
                   pathname: "/chat/[id]",
@@ -296,21 +352,28 @@ const ReportDetailView = ({
               } catch (error: any) {
                 console.error("Gagal membuka chat room:", error.response?.data || error);
                 Alert.alert("Error", "Gagal membuka chat room. Silakan coba lagi.");
+              } finally {
+                setIsNavigatingChat(false);
               }
             }}
+            disabled={isNavigatingChat}
             className="flex-row items-center justify-center rounded-2xl py-4"
-            style={{ backgroundColor: theme.colors.primary }}
+            style={{ backgroundColor: theme.colors.primary, opacity: isNavigatingChat ? 0.7 : 1 }}
           >
-            <MaterialCommunityIcons
-              name="chat-processing"
-              size={20}
-              color={theme.colors.onPrimary}
-            />
+            {isNavigatingChat ? (
+              <LoadingOverlay size="small" transparent />
+            ) : (
+              <MaterialCommunityIcons
+                name="chat-processing"
+                size={20}
+                color={theme.colors.onPrimary}
+              />
+            )}
             <Text
               className="ml-2 text-base font-bold"
               style={{ color: theme.colors.onPrimary }}
             >
-              Chat Pelapor
+              {isNavigatingChat ? "Membuka Chat..." : "Chat Pelapor"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -344,7 +407,7 @@ const ReportDetailView = ({
       )}
 
       {/* Edit Modal */}
-      {isCreator && (
+      {canEditOrDelete && (
         <EditReportModal
           visible={isEditModalVisible}
           item={item}

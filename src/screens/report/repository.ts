@@ -28,4 +28,12 @@ export const ReportRepository = {
     });
     return data;
   },
+
+  async deleteReport(id: string, token: string): Promise<void> {
+    await api.delete(`${this.endpoint}/${id}/`, {
+      headers: {
+        "Authorization": `Token ${token}`
+      },
+    });
+  },
 };

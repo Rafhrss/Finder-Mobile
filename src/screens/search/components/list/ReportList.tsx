@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FlatList, View, Text } from "react-native";
-import LoadingOverlay from "@/src/components/common/LoadingOverlay";
+import ScreenLoader from "@/src/components/common/ScreenLoader";
+import ButtonLoader from "@/src/components/common/ButtonLoader";
 import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import ReportCard from "@components/common/ReportCard";
 import type { ReportItem } from "@libs/types";
@@ -31,7 +32,7 @@ const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => 
   if (isLoading && reports.length === 0) {
     return (
       <View className="flex-1 items-center justify-center">
-        <LoadingOverlay transparent />
+        <ScreenLoader transparent />
       </View>
     );
   }
@@ -69,7 +70,7 @@ const ReportList = ({ activeTab, searchQuery, openDetail }: ReportListProps) => 
       ListFooterComponent={
         isLoadingMore && !isReachingEnd ? (
           <View className="py-4">
-            <LoadingOverlay size="small" transparent />
+            <ButtonLoader />
           </View>
         ) : null
       }

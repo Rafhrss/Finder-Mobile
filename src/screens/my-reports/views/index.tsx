@@ -1,4 +1,4 @@
-import LoadingOverlay from "@/src/components/common/LoadingOverlay";
+import ScreenLoader from "@/src/components/common/ScreenLoader";
 import ReportCard from "@/src/components/common/ReportCard";
 import { ReportDetailOverlay } from "@/src/components/layout/ReportDetailOverlay";
 import { theme } from "@/src/libs/theme";
@@ -133,7 +133,7 @@ const MyReportsView = () => {
         {/* List Content */}
         {isLoading && !refreshing ? (
           <View className="flex-1 justify-center items-center">
-            <LoadingOverlay transparent={true} />
+            <ScreenLoader transparent={true} />
           </View>
         ) : (
           <FlatList

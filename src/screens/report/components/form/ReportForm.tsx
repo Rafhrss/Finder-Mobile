@@ -14,7 +14,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
 import * as ImagePicker from "expo-image-picker";
 import { PREDEFINED_LOCATIONS } from "../../constants";
-import LoadingOverlay from "@/src/components/common/LoadingOverlay";
+import ButtonLoader from "@/src/components/common/ButtonLoader";
 
 export interface ReportFormData {
   status: "LOST" | "FOUND" | "CLAIMED";
@@ -262,7 +262,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               }}
             >
               {isSubmitting ? (
-                <LoadingOverlay size="small" transparent />
+                <ButtonLoader />
               ) : (
                 <Text className="font-bold text-lg" style={{ color: "#050A10" }}>
                   {submitLabel}

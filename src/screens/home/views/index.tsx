@@ -2,7 +2,7 @@ import { theme } from "@libs/theme";
 import type { ReportItem } from "@libs/types";
 import React, { useState } from "react";
 import { ScrollView, View, Text } from "react-native";
-import LoadingOverlay from "@components/common/LoadingOverlay";
+import ScreenLoader from "@components/common/ScreenLoader";
 import CustomRefreshControl from "@components/common/CustomRefreshControl";
 import Carousel from "../components/Carousel";
 import LatestReports from "../components/LatestReports";
@@ -24,7 +24,7 @@ const HomeView = ({ openDetail, jumpTo }: HomeViewProps) => {
   };
 
   if (isLoading && reports.length === 0) {
-    return <LoadingOverlay />;
+    return <ScreenLoader />;
   }
 
   if (error && reports.length === 0) {

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, TextInput, TouchableOpacity } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import LoadingOverlay from "@/src/components/common/LoadingOverlay";
+import ButtonLoader from "@/src/components/common/ButtonLoader";
 import { theme } from "@libs/theme";
 
 interface ChatInputBarProps {
@@ -49,7 +49,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         }}
       >
         {isSending ? (
-          <LoadingOverlay size="small" transparent />
+          <ButtonLoader />
         ) : (
           <MaterialCommunityIcons
             name="send"

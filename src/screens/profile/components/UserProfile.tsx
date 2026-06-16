@@ -1,6 +1,6 @@
 import { useAuth } from "@/src/contexts/AuthContext";
 import { theme } from "@/src/libs/theme";
-import LoadingOverlay from "@components/common/LoadingOverlay";
+import ScreenLoader from "@components/common/ScreenLoader";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
@@ -41,7 +41,7 @@ const UserProfile = () => {
   };
 
   if (isLoading && !user) {
-    return <LoadingOverlay />;
+    return <ScreenLoader />;
   }
 
   return (

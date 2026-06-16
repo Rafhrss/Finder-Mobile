@@ -9,6 +9,9 @@ interface ChatHeaderProps {
   topInset: number;
   profilePicture?: string | null;
   reportId?: string;
+  isCreator?: boolean;
+  isReportActive?: boolean;
+  onComplete?: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -17,6 +20,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   topInset,
   profilePicture,
   reportId,
+  isCreator,
+  isReportActive,
+  onComplete,
 }) => {
   const router = useRouter();
 
@@ -55,15 +61,26 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       </View>
 
       {reportId && (
-        <TouchableOpacity
-          onPress={() => {
-            router.push(`/report/${reportId}`);
-          }}
-          className="bg-blue-500/20 px-3 py-1.5 rounded-full flex-row items-center ml-2 shrink-0"
-        >
-          <MaterialCommunityIcons name="clipboard-text-outline" size={16} color="#3b82f6" />
-          <Text className="text-blue-500 font-semibold text-xs ml-1">Laporan</Text>
-        </TouchableOpacity>
+        <View className="flex-row items-center space-x-2">
+          {isCreator && isReportActive && (
+            <TouchableOpacity
+              onPress={onComplete}
+              className="bg-green-500/20 px-3 py-1.5 rounded-full flex-row items-center shrink-0"
+            >
+              <MaterialCommunityIcons name="check-circle-outline" size={16} color="#22c55e" />
+              <Text className="text-green-500 font-semibold text-xs ml-1">Selesai</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={() => {
+              router.push(`/report/${reportId}`);
+            }}
+            className="bg-blue-500/20 px-3 py-1.5 rounded-full flex-row items-center shrink-0 ml-2"
+          >
+            <MaterialCommunityIcons name="clipboard-text-outline" size={16} color="#3b82f6" />
+            <Text className="text-blue-500 font-semibold text-xs ml-1">Laporan</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );

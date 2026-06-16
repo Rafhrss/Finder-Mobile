@@ -1,6 +1,7 @@
 import { formatDateString } from "@/src/utils/date";
 import { getStatusConfig } from "@/src/utils/status";
-import LoadingOverlay from "@components/common/LoadingOverlay";
+import ScreenLoader from "@components/common/ScreenLoader";
+import ButtonLoader from "@components/common/ButtonLoader";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "@libs/theme";
 import type { ReportItem } from "@libs/types";
@@ -106,7 +107,7 @@ const ReportDetailView = ({
   }
 
   if (!item) {
-    return <LoadingOverlay />;
+    return <ScreenLoader />;
   }
 
   const statusConfig = getStatusConfig(item.status);
@@ -341,12 +342,15 @@ const ReportDetailView = ({
               try {
                 api.defaults.headers.common["Authorization"] = `Token ${userToken}`;
                 const room = await ChatRepository.createOrGetRoom(item.id);
+                const otherUser = room.user1.id === currentUser?.id ? room.user2 : room.user1;
                 router.push({
                   pathname: "/chat/[id]",
                   params: {
                     id: room.id,
                     createdAt: room.created_at,
-                    otherUserName: room.user1.name, // Since we are not the owner, the other user is the owner (user1)
+                    otherUserName: otherUser.name,
+                    otherUserAvatar: otherUser.profile_picture,
+                    reportId: typeof room.report === 'object' ? (room.report as any).id : room.report,
                   }
                 });
               } catch (error: any) {
@@ -361,7 +365,7 @@ const ReportDetailView = ({
             style={{ backgroundColor: theme.colors.primary, opacity: isNavigatingChat ? 0.7 : 1 }}
           >
             {isNavigatingChat ? (
-              <LoadingOverlay size="small" transparent />
+              <ButtonLoader />
             ) : (
               <MaterialCommunityIcons
                 name="chat-processing"

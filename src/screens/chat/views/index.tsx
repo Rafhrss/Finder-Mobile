@@ -18,7 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import LoadingOverlay from "@/src/components/common/LoadingOverlay";
+import ScreenLoader from "@/src/components/common/ScreenLoader";
 import { Searchbar } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChatHeader } from "../components/ChatHeader";
@@ -26,6 +26,8 @@ import { ChatInputBar } from "../components/ChatInputBar";
 import { ChatMessageBubble } from "../components/ChatMessageBubble";
 import { useChatRoom } from "../hooks/useChatRoom";
 import { ChatRepository, ChatRoom, ChatUser } from "../repository";
+import { useReportDetail } from "../../report/hooks/useReportDetail";
+import { ReportRepository } from "../../report/repository";
 
 const ChatListView = () => {
   const router = useRouter();
@@ -234,7 +236,7 @@ const ChatListView = () => {
 
         {/* Chat List */}
         {isLoading ? (
-          <LoadingOverlay transparent />
+          <ScreenLoader transparent />
         ) : (
           <FlatList
             data={filteredRooms}
@@ -302,6 +304,12 @@ export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [otherUser] = useState<ChatUser | null>(null);
   const flatListRef = useRef<FlatList>(null);
+  const { userToken } = useAuth();
+  
+  // Fetch report detail if reportId is present
+  const { data: report, mutate: mutateReport } = useReportDetail(reportId || "");
+  const isCreator = report?.user?.id === currentUserId;
+  const isReportActive = report?.status !== "CLAIMED" && report?.status !== "FOUND";
 
   // Handle specific 404 error
   useEffect(() => {
@@ -339,6 +347,34 @@ export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
     }
   };
 
+  const handleCompleteReport = async () => {
+    if (!reportId || !userToken) return;
+
+    Alert.alert(
+      "Selesaikan Laporan",
+      "Apakah Anda yakin laporan ini sudah selesai (Claimed)? Laporan akan ditandai selesai dan tidak bisa diubah lagi.",
+      [
+        { text: "Batal", style: "cancel" },
+        {
+          text: "Selesai",
+          style: "default",
+          onPress: async () => {
+            try {
+              const formData = new FormData();
+              formData.append("status", "CLAIMED");
+              await ReportRepository.updateReport(reportId, formData, userToken);
+              mutateReport();
+              Alert.alert("Sukses", "Laporan berhasil ditandai selesai.");
+            } catch (error) {
+              console.error("Gagal menyelesaikan laporan:", error);
+              Alert.alert("Error", "Gagal mengubah status laporan.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
   // Check if chat is older than 2 days
   useEffect(() => {
     if (createdAt) {
@@ -369,6 +405,9 @@ export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
         topInset={insets.top}
         profilePicture={otherUserAvatar}
         reportId={reportId}
+        isCreator={isCreator}
+        isReportActive={isReportActive}
+        onComplete={handleCompleteReport}
       />
 
       {/* Messages */}
@@ -377,7 +416,7 @@ export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         {isLoading ? (
-        <LoadingOverlay transparent />
+        <ScreenLoader transparent />
       ) : (
           <FlatList
             ref={flatListRef}
